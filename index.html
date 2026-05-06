@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0F1824"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="AureliaFolio"/>
+<meta name="application-name" content="AureliaFolio"/>
+<meta name="msapplication-TileColor" content="#0F1824"/>
+<title>AureliaFolio</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy-deep:#0F1824;--navy-mid:#1A2535;--navy-surface:#243044;--navy-elevated:#2D3D56;
+  --navy-border:#3D5070;--teal-bright:#5DCAA5;--teal-mid:#1D9E75;--teal-dark:#0F6E56;
+  --teal-glow:rgba(93,202,165,0.15);--amber-bright:#EF9F27;--amber-mid:#BA7517;
+  --text-primary:#F0F4F8;--text-secondary:#9FB3C8;--text-muted:#6B849E;
+  --paper:#F4F6F9;--paper-line:#E2E8F0;
+  --font-display:'Cormorant Garamond',Georgia,serif;--font-body:'DM Sans',sans-serif;
+  --radius:10px;--radius-lg:16px;--transition:0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--navy-deep);color:var(--text-primary);min-height:100vh;overflow-x:hidden;}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);padding:48px 40px;text-align:center;max-width:380px;width:100%;}
+.auth-logo{font-family:var(--font-display);font-size:42px;font-weight:300;margin-bottom:8px;}
+.auth-logo span{color:var(--teal-bright);font-style:italic;}
+.auth-tagline{font-size:14px;color:var(--text-muted);margin-bottom:36px;line-height:1.5;}
+.google-btn{width:100%;padding:13px 20px;border-radius:var(--radius);border:1px solid var(--navy-border);background:var(--navy-surface);color:var(--text-primary);font-family:var(--font-body);font-size:15px;font-weight:500;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:10px;}
+.google-btn:hover{border-color:var(--teal-bright);background:var(--teal-glow);color:var(--teal-bright);}
+
+/* LOADING */
+.loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.spinner{width:36px;height:36px;border:3px solid var(--navy-border);border-top-color:var(--teal-bright);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:14px;color:var(--text-muted);}
+
+/* HEADER */
+.app-header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,24,36,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--navy-border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--font-display);font-size:22px;font-weight:400;}
+.logo span{color:var(--teal-bright);font-style:italic;}
+.header-right{display:flex;gap:8px;align-items:center;}
+.user-avatar{width:34px;height:34px;border-radius:50%;border:2px solid var(--teal-mid);object-fit:cover;cursor:pointer;}
+.user-initials{width:34px;height:34px;border-radius:50%;border:2px solid var(--teal-mid);background:var(--teal-dark);color:#fff;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.icon-btn{width:38px;height:38px;border-radius:8px;border:1px solid var(--navy-border);background:var(--navy-surface);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);font-size:16px;}
+.icon-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright);background:var(--teal-glow);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-elevated);border:1px solid var(--navy-border);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--text-primary);z-index:999;transition:transform 0.3s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--teal-mid);}
+.toast.error{border-color:#8B1A1A;}
+/* UNDO TOAST */
+.undo-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-elevated);border:1px solid var(--amber-mid);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--text-primary);z-index:999;transition:transform 0.3s ease;display:flex;align-items:center;gap:16px;white-space:nowrap;}
+.undo-toast.show{transform:translateX(-50%) translateY(0);}
+.undo-btn{background:var(--amber-mid);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:500;padding:5px 12px;cursor:pointer;font-family:var(--font-body);transition:var(--transition);}
+.undo-btn:hover{background:var(--amber-bright);}
+.undo-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--amber-mid);border-radius:0 0 var(--radius) var(--radius);transition:width linear;}
+
+/* INSTALL BANNER */
+.install-banner{position:fixed;bottom:20px;right:20px;z-index:500;background:var(--navy-mid);border:1px solid var(--teal-bright);border-radius:var(--radius-lg);padding:16px 20px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,0.4);transform:translateY(120px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column;gap:10px;}
+.install-banner.show{transform:translateY(0);}
+.install-banner-title{font-family:var(--font-display);font-size:18px;font-weight:400;color:var(--text-primary);}
+.install-banner-title span{color:var(--teal-bright);font-style:italic;}
+.install-banner-text{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+.install-banner-actions{display:flex;gap:8px;}
+.install-btn{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid;font-family:var(--font-body);transition:var(--transition);}
+.install-btn.primary{background:var(--teal-mid);border-color:var(--teal-bright);color:#fff;}
+.install-btn.primary:hover{background:var(--teal-bright);}
+.install-btn.ghost{background:transparent;border-color:var(--navy-border);color:var(--text-secondary);}
+.install-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-primary);}
+
+/* OFFLINE INDICATOR */
+.offline-bar{position:fixed;top:60px;left:0;right:0;z-index:99;background:#8B1A1A;color:#FEE2E2;font-size:12px;font-weight:500;text-align:center;padding:6px;transform:translateY(-100%);transition:transform 0.3s ease;}
+.offline-bar.show{transform:translateY(0);}
+
+
+/* MAIN */
+.main{padding:80px 20px 100px;max-width:900px;margin:0 auto;}
+
+/* SHELF */
+.shelf-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px;}
+.shelf-title{font-family:var(--font-display);font-size:36px;font-weight:300;}
+.shelf-title em{color:var(--teal-bright);font-style:italic;}
+.shelf-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px;}
+.binder-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;}
+.binder-card{border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:transform var(--transition),box-shadow var(--transition);border:1px solid var(--navy-border);background:var(--navy-mid);position:relative;}
+.binder-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+.binder-card-spine{position:absolute;left:0;top:0;bottom:0;width:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.spine-ring{width:8px;height:8px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);}
+.binder-card-body{margin-left:14px;padding:14px 12px;min-height:200px;display:flex;flex-direction:column;}
+.binder-card-cover{flex:1;border-radius:6px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background-size:cover;background-position:center;}
+.binder-tabs-preview{position:absolute;right:-4px;top:20px;display:flex;flex-direction:column;gap:4px;}
+.tab-stub{width:24px;height:18px;border-radius:4px 0 0 4px;font-size:9px;font-weight:500;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.9);}
+.binder-card-name{font-size:13px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.binder-card-meta{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.add-binder-card{border-radius:var(--radius-lg);border:1px dashed var(--navy-border);background:transparent;cursor:pointer;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);transition:var(--transition);}
+.add-binder-card:hover{border-color:var(--teal-bright);color:var(--teal-bright);background:var(--teal-glow);}
+
+/* MODALS */
+.modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(9,15,24,0.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity var(--transition);}
+.modal-backdrop.open{opacity:1;pointer-events:all;}
+.modal{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:460px;transform:translateY(16px);transition:transform var(--transition);max-height:90vh;overflow-y:auto;}
+.modal-backdrop.open .modal{transform:translateY(0);}
+.modal-title{font-family:var(--font-display);font-size:24px;font-weight:400;color:var(--text-primary);margin-bottom:20px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:10px 14px;background:var(--navy-surface);border:1px solid var(--navy-border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:14px;transition:var(--transition);outline:none;}
+.form-input:focus{border-color:var(--teal-bright);background:var(--navy-elevated);}
+.form-input::placeholder{color:var(--text-muted);}
+select.form-input option{background:var(--navy-mid);}
+.color-picker-row{display:flex;gap:8px;flex-wrap:wrap;}
+.color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:var(--transition);}
+.color-dot.selected,.color-dot:hover{border-color:var(--text-primary);transform:scale(1.15);}
+.modal-actions{display:flex;gap:10px;margin-top:24px;}
+.btn{flex:1;padding:11px;border-radius:var(--radius);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);border:1px solid;}
+.btn-primary{background:var(--teal-mid);border-color:var(--teal-bright);color:#fff;}
+.btn-primary:hover{background:var(--teal-bright);}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-ghost{background:transparent;border-color:var(--navy-border);color:var(--text-secondary);}
+.btn-ghost:hover{border-color:var(--text-secondary);color:var(--text-primary);}
+
+/* COVER UPLOAD */
+.cover-upload-area{border:1px dashed var(--navy-border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:var(--transition);color:var(--text-muted);font-size:13px;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;overflow:hidden;}
+.cover-upload-area:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+.cover-preview-img{width:100%;height:80px;object-fit:cover;border-radius:var(--radius);display:none;}
+
+/* EMOJI PICKER */
+.emoji-picker-wrap{position:relative;}
+.emoji-trigger-row{display:flex;gap:8px;}
+.emoji-trigger{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--navy-border);background:var(--navy-surface);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);flex-shrink:0;}
+.emoji-trigger:hover{border-color:var(--teal-bright);}
+.emoji-panel{position:absolute;top:52px;left:0;z-index:300;background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);padding:12px;width:300px;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:none;}
+.emoji-panel.open{display:block;}
+.emoji-search{width:100%;padding:8px 12px;background:var(--navy-surface);border:1px solid var(--navy-border);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:10px;}
+.emoji-search:focus{border-color:var(--teal-bright);}
+.emoji-category-label{font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin:8px 0 4px;}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:2px;}
+.emoji-btn{width:34px;height:34px;border-radius:6px;border:none;background:transparent;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.emoji-btn:hover{background:var(--navy-surface);}
+.emoji-scroll{max-height:200px;overflow-y:auto;}
+.tab-color-row{display:flex;gap:6px;flex-wrap:wrap;}
+.tab-color-swatch{width:26px;height:26px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:var(--transition);}
+.tab-color-swatch.selected,.tab-color-swatch:hover{border-color:var(--text-primary);}
+
+/* BINDER VIEW */
+.binder-view{display:none;}
+.binder-view.active{display:block;}
+.shelf-view.hidden{display:none;}
+.binder-chrome{display:flex;background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);overflow:hidden;min-height:calc(100vh - 180px);}
+.binder-spine-bar{width:40px;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:14px;flex-shrink:0;}
+.spine-ring-large{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);}
+.binder-tab-column{width:48px;background:var(--navy-surface);border-left:1px solid var(--navy-border);display:flex;flex-direction:column;padding:16px 0;gap:2px;flex-shrink:0;}
+.binder-tab{position:relative;cursor:pointer;margin-left:-1px;}
+.binder-tab-label{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:500;padding:12px 6px;border-radius:6px 0 0 6px;border:1px solid transparent;border-left:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:100px;transition:var(--transition);display:flex;align-items:center;gap:4px;}
+.binder-tab.active .binder-tab-label{border-color:var(--navy-border);border-left:none;background:var(--navy-mid);margin-left:-1px;z-index:2;position:relative;}
+.tab-add-btn{margin:8px auto 0;width:28px;height:28px;border-radius:6px;border:1px dashed var(--navy-border);background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:var(--transition);}
+.tab-add-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+.binder-content-area{flex:1;background:var(--paper);display:flex;flex-direction:column;overflow:hidden;}
+.binder-content-header{padding:16px 20px 12px;border-bottom:1px solid var(--paper-line);display:flex;align-items:center;justify-content:space-between;background:#fff;}
+.content-section-title{font-family:var(--font-display);font-size:20px;font-weight:500;color:#1A2535;}
+.content-actions{display:flex;gap:8px;}
+.content-btn{padding:7px 14px;border-radius:6px;border:1px solid #CBD5E0;background:#fff;color:#4A5568;font-size:12px;font-weight:500;cursor:pointer;transition:var(--transition);font-family:var(--font-body);}
+.content-btn:hover{border-color:var(--teal-dark);color:var(--teal-dark);}
+.content-btn.primary{background:var(--teal-dark);border-color:var(--teal-dark);color:#fff;}
+.content-btn.primary:hover{background:var(--teal-mid);}
+.binder-page-area{flex:1;padding:24px;overflow-y:auto;background:var(--paper);}
+
+/* DOCS */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;}
+.doc-card{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:var(--transition);display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;}
+.doc-card:hover{border-color:var(--teal-mid);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.doc-delete{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:4px;border:none;background:#FEE2E2;color:#991B1B;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.doc-card:hover .doc-delete{display:flex;}
+.doc-icon{font-size:28px;}
+.doc-name{font-size:11px;font-weight:500;color:#2D3748;text-align:center;line-height:1.3;word-break:break-all;}
+.doc-meta{font-size:10px;color:#718096;}
+.doc-upload-trigger{background:transparent;border:1px dashed #CBD5E0;border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:var(--transition);display:flex;flex-direction:column;align-items:center;gap:8px;color:#A0AEC0;}
+.doc-upload-trigger:hover{border-color:var(--teal-mid);color:var(--teal-mid);background:rgba(29,158,117,0.04);}
+.upload-progress{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;}
+.upload-progress-name{font-size:12px;color:#2D3748;margin-bottom:6px;}
+.progress-bar{height:4px;background:#E2E8F0;border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--teal-mid);border-radius:2px;transition:width 0.3s ease;}
+
+/* TOC */
+.toc-section{background:#fff;border-radius:var(--radius);border:1px solid var(--paper-line);padding:20px;margin-bottom:20px;}
+.toc-title{font-family:var(--font-display);font-size:18px;font-weight:500;color:#1A2535;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--paper-line);}
+.toc-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dotted var(--paper-line);font-size:13px;color:#2D3748;cursor:pointer;}
+.toc-row:last-child{border-bottom:none;}
+.toc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.toc-name{flex:1;}
+.toc-count{font-size:11px;color:#718096;}
+.toc-row:hover .toc-name{color:var(--teal-dark);}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:#A0AEC0;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-text{font-size:14px;line-height:1.6;}
+
+/* DRAG & DROP */
+.binder-page-area.drag-over{background:#EBF8F3;outline:3px dashed var(--teal-mid);outline-offset:-6px;}
+.drag-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(29,158,117,0.08);pointer-events:none;opacity:0;transition:opacity 0.15s ease;border-radius:var(--radius);}
+.drag-hint.visible{opacity:1;}
+.drag-hint-icon{font-size:40px;}
+.drag-hint-text{font-size:15px;font-weight:500;color:var(--teal-dark);}
+
+/* IMAGE PREVIEW MODAL */
+.img-preview-backdrop{position:fixed;inset:0;z-index:400;background:rgba(5,10,18,0.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s ease;}
+.img-preview-backdrop.open{opacity:1;pointer-events:all;}
+.img-preview-inner{position:relative;max-width:90vw;max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.img-preview-inner img{max-width:100%;max-height:80vh;border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,0.6);object-fit:contain;}
+.img-preview-name{font-size:13px;color:var(--text-secondary);}
+.img-preview-close{position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:var(--navy-elevated);border:1px solid var(--navy-border);color:var(--text-primary);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.img-preview-close:hover{background:var(--navy-border);}
+
+/* RENAME MODAL */
+.rename-input{width:100%;padding:10px 14px;background:var(--navy-surface);border:1px solid var(--navy-border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:14px;outline:none;transition:var(--transition);}
+.rename-input:focus{border-color:var(--teal-bright);}
+
+/* DOC CARD ACTIONS */
+.doc-card-actions{position:absolute;top:6px;right:6px;display:none;gap:4px;}
+.doc-card:hover .doc-card-actions{display:flex;}
+.doc-action-btn{width:20px;height:20px;border-radius:4px;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.doc-action-btn.rename{background:#EBF8F3;color:#0F6E56;}
+.doc-action-btn.rename:hover{background:#5DCAA5;color:#fff;}
+.doc-action-btn.del{background:#FEE2E2;color:#991B1B;}
+.doc-action-btn.del:hover{background:#FCA5A5;}
+
+/* TAB REORDER */
+.binder-tab{position:relative;cursor:pointer;margin-left:-1px;}
+.binder-tab.dragging{opacity:0.4;}
+.binder-tab.drag-target-above::before{content:'';position:absolute;top:0;left:2px;right:2px;height:2px;background:var(--teal-bright);border-radius:1px;}
+.binder-tab.drag-target-below::after{content:'';position:absolute;bottom:0;left:4px;right:4px;height:2px;background:var(--teal-bright);border-radius:1px;}
+.reorder-hint{font-size:10px;color:var(--text-muted);text-align:center;padding:4px 6px;margin-top:4px;}
+/* SYNC MODAL */
+.sync-modal-section{background:var(--navy-surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.sync-modal-section-title{font-size:12px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.sync-modal-section-desc{font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;}
+.sync-btn{width:100%;padding:11px;border-radius:var(--radius);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);border:1px solid;display:flex;align-items:center;justify-content:center;gap:8px;}
+.sync-btn.export{background:var(--teal-dark);border-color:var(--teal-bright);color:#fff;}
+.sync-btn.export:hover{background:var(--teal-mid);}
+.sync-btn.import{background:var(--navy-elevated);border-color:var(--navy-border);color:var(--text-primary);}
+.sync-btn.import:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+.sync-last-backup{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;}
+.sync-import-result{font-size:12px;border-radius:var(--radius);padding:10px 14px;margin-top:10px;display:none;line-height:1.6;}
+.sync-import-result.success{background:rgba(29,158,117,0.1);border:1px solid var(--teal-mid);color:var(--teal-bright);}
+.sync-import-result.error{background:rgba(139,26,26,0.1);border:1px solid #8B1A1A;color:#F09595;}
+.sync-divider{border:none;border-top:1px solid var(--navy-border);margin:4px 0 12px;}
+
+/* PHASE 7: RECENTLY OPENED */
+.recently-opened{margin-bottom:28px;}
+.recently-label{font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+.recently-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+.recently-row::-webkit-scrollbar{height:3px;}
+.recently-row::-webkit-scrollbar-track{background:transparent;}
+.recently-row::-webkit-scrollbar-thumb{background:var(--navy-border);border-radius:2px;}
+.recently-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;border:1px solid var(--navy-border);background:var(--navy-mid);cursor:pointer;transition:var(--transition);white-space:nowrap;flex-shrink:0;}
+.recently-chip:hover{border-color:var(--teal-bright);background:var(--teal-glow);}
+.recently-chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.recently-chip-name{font-size:13px;color:var(--text-primary);font-weight:500;}
+.recently-chip-time{font-size:11px;color:var(--text-muted);}
+
+/* PHASE 7: DOC NOTES */
+.doc-notes-text{font-size:10px;color:#718096;text-align:center;font-style:italic;line-height:1.3;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-notes-modal-input{width:100%;padding:10px 14px;background:var(--navy-surface);border:1px solid var(--navy-border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:14px;outline:none;transition:var(--transition);resize:none;min-height:80px;line-height:1.6;}
+.doc-notes-modal-input:focus{border-color:var(--teal-bright);}
+.doc-notes-modal-input::placeholder{color:var(--text-muted);}
+
+/* PHASE 7: MOVE DOC */
+.move-doc-tab-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;}
+.move-doc-tab-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--navy-border);background:var(--navy-surface);cursor:pointer;transition:var(--transition);}
+.move-doc-tab-item:hover{border-color:var(--teal-bright);background:var(--teal-glow);}
+.move-doc-tab-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.move-doc-tab-label{font-size:13px;color:var(--text-primary);}
+.move-doc-tab-count{font-size:11px;color:var(--text-muted);margin-left:auto;}
+
+/* PHASE 7: DUPLICATE BINDER */
+.duplicate-binder-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--navy-border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;transition:var(--transition);font-family:var(--font-body);}
+.duplicate-binder-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+
+/* PHASE 6: SORT BAR */
+.sort-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.sort-label{font-size:12px;color:var(--text-muted);font-weight:500;}
+.sort-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--navy-border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;transition:var(--transition);font-family:var(--font-body);}
+.sort-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+.sort-btn.active{background:var(--teal-dark);border-color:var(--teal-bright);color:#fff;}
+.sort-btn.pinned-sort{border-color:var(--amber-mid);color:var(--amber-mid);}
+.sort-btn.pinned-sort.active{background:var(--amber-mid);border-color:var(--amber-bright);color:#fff;}
+
+/* PHASE 6: BINDER PIN STAR */
+.binder-card-pin{position:absolute;top:8px;left:20px;width:22px;height:22px;border-radius:50%;background:rgba(15,24,36,0.7);border:none;color:var(--amber-bright);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:2;opacity:0;}
+.binder-card:hover .binder-card-pin{opacity:1;}
+.binder-card.binder-pinned .binder-card-pin{opacity:1;background:var(--amber-mid);}
+.binder-card.binder-pinned{border-color:var(--amber-mid);}
+.binder-pinned-badge{position:absolute;top:8px;left:20px;font-size:11px;z-index:2;}
+
+/* PHASE 6: DOC COUNT BADGE */
+.tab-doc-badge{display:inline-block;background:rgba(255,255,255,0.25);color:#fff;font-size:8px;font-weight:600;border-radius:8px;padding:1px 4px;margin-left:2px;min-width:14px;text-align:center;line-height:14px;}
+
+/* PHASE 6: TAB NOTES */
+.tab-notes-area{background:#fff;border-radius:var(--radius);border:1px solid var(--paper-line);padding:16px 20px;margin-bottom:16px;}
+.tab-notes-label{font-size:11px;font-weight:500;color:#718096;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.tab-notes-input{width:100%;border:none;outline:none;font-family:var(--font-body);font-size:13px;color:#2D3748;resize:none;min-height:60px;line-height:1.6;background:transparent;}
+.tab-notes-input::placeholder{color:#CBD5E0;}
+.tab-notes-saved{font-size:11px;color:var(--teal-dark);margin-top:4px;opacity:0;transition:opacity 0.3s;}
+.tab-notes-saved.show{opacity:1;}
+
+/* PINNED / FAVORITES */
+.doc-pin-btn{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:4px;border:none;background:transparent;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);opacity:0;z-index:2;}
+.doc-card:hover .doc-pin-btn{opacity:1;}
+.doc-card.pinned .doc-pin-btn{opacity:1;}
+.doc-card.pinned{border-color:var(--amber-mid);background:linear-gradient(135deg,#fff 92%,#FAEEDA 100%);}
+.pinned-section{background:#fff;border-radius:var(--radius);border:1px solid var(--amber-mid);padding:16px 20px;margin-bottom:20px;}
+.pinned-section-title{font-family:var(--font-display);font-size:16px;font-weight:500;color:#1A2535;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.pinned-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dotted var(--paper-line);cursor:pointer;transition:var(--transition);}
+.pinned-row:last-child{border-bottom:none;}
+.pinned-row:hover{color:var(--teal-dark);}
+.pinned-row-icon{font-size:18px;flex-shrink:0;}
+.pinned-row-info{flex:1;min-width:0;}
+.pinned-row-name{font-size:13px;font-weight:500;color:#2D3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pinned-row-tab{font-size:11px;color:#718096;}
+.pinned-row:hover .pinned-row-name{color:var(--teal-dark);}
+
+/* GLOBAL PINNED VIEW */
+.global-pinned-view{display:none;}
+.global-pinned-view.active{display:block;}
+.global-pinned-header{font-family:var(--font-display);font-size:28px;font-weight:300;color:var(--text-primary);margin-bottom:8px;}
+.global-pinned-header em{color:var(--amber-bright);font-style:italic;}
+.global-pinned-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.global-pinned-binder-group{margin-bottom:28px;}
+.global-pinned-binder-name{font-size:12px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--navy-border);}
+
+/* BINDER CARD EDIT BUTTON */
+.binder-card-edit{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:6px;background:rgba(15,24,36,0.7);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:var(--transition);z-index:2;}
+.binder-card:hover .binder-card-edit{display:flex;}
+.binder-card-edit:hover{background:var(--teal-dark);border-color:var(--teal-bright);}
+
+/* COVER GALLERY */
+.cover-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.cover-gallery-item{border-radius:8px;aspect-ratio:3/2;cursor:pointer;border:2px solid transparent;transition:var(--transition);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:rgba(255,255,255,0.9);text-align:center;padding:4px;}
+.cover-gallery-item:hover{border-color:var(--teal-bright);transform:scale(1.03);}
+.cover-gallery-item.selected{border-color:var(--teal-bright);box-shadow:0 0 0 2px var(--teal-glow);}
+.cover-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.cover-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--navy-border);background:transparent;color:var(--text-secondary);transition:var(--transition);}
+.cover-tab.active{background:var(--teal-dark);border-color:var(--teal-bright);color:#fff;}
+
+/* TAB EDIT MENU */
+.tab-ctx-menu{position:absolute;right:52px;left:auto;top:0;z-index:50;background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius);padding:4px;min-width:130px;box-shadow:0 8px 24px rgba(0,0,0,0.4);display:none;}
+.tab-ctx-menu.open{display:block;}
+.tab-ctx-item{padding:8px 12px;border-radius:6px;font-size:12px;color:var(--text-primary);cursor:pointer;transition:var(--transition);}
+.tab-ctx-item:hover{background:var(--navy-surface);}
+.tab-ctx-item.danger{color:#F09595;}
+.tab-ctx-item.danger:hover{background:rgba(139,26,26,0.2);}
+
+
+/* SEARCH */
+.search-overlay{position:fixed;inset:0;z-index:300;background:rgba(9,15,24,0.9);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;padding:80px 20px 20px;opacity:0;pointer-events:none;transition:opacity var(--transition);}
+.search-overlay.open{opacity:1;pointer-events:all;}
+.search-box{width:100%;max-width:560px;background:var(--navy-mid);border:1px solid var(--teal-bright);border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:12px;}
+.search-input{flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font-family:var(--font-body);font-size:16px;}
+.search-input::placeholder{color:var(--text-muted);}
+.search-results{width:100%;max-width:560px;margin-top:12px;background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);overflow:hidden;}
+.search-result-item{padding:14px 20px;border-bottom:1px solid var(--navy-border);cursor:pointer;transition:var(--transition);}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:hover{background:var(--navy-surface);}
+.sr-binder{font-size:11px;color:var(--teal-bright);margin-bottom:3px;}
+.sr-name{font-size:14px;color:var(--text-primary);}
+
+/* BACK NAV */
+.back-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;width:fit-content;color:var(--text-secondary);font-size:13px;transition:var(--transition);}
+.back-nav:hover{color:var(--teal-bright);}
+.binder-topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.binder-name-display{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--text-primary);flex:1;}
+.search-within-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--navy-border);background:var(--navy-surface);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;transition:var(--transition);font-family:var(--font-body);display:flex;align-items:center;gap:6px;}
+.search-within-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright);}
+
+/* USER MENU */
+.user-menu{position:fixed;top:66px;right:16px;z-index:200;background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius-lg);padding:8px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.4);display:none;}
+.user-menu.open{display:block;}
+.user-menu-name{padding:10px 12px 6px;font-size:13px;color:var(--text-secondary);border-bottom:1px solid var(--navy-border);margin-bottom:6px;}
+.user-menu-item{padding:10px 12px;border-radius:8px;font-size:13px;color:var(--text-primary);cursor:pointer;transition:var(--transition);}
+.user-menu-item:hover{background:var(--navy-surface);}
+.user-menu-item.danger{color:#F09595;}
+.user-menu-item.danger:hover{background:rgba(139,26,26,0.2);}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading Folio…</div>
+</div>
+
+<div id="authScreen" class="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo"><span>Folio</span></div>
+    <div class="auth-tagline">Meticulously organized. Infinitely accessible.<br><span style="font-family:var(--font-display);font-size:15px;font-style:italic;color:var(--text-secondary);">Where every resource collection finds a home.</span><br><br>Sign in to access your binders.</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
+  <header class="app-header">
+    <div class="logo"><span>Folio</span></div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="openSearch()" title="Search">🔍</button>
+      <button class="icon-btn" onclick="openGlobalPinned()" title="All Pinned Documents">📌</button>
+      <button class="icon-btn" onclick="openSyncModal()" title="Backup & Restore">☁️</button>
+      <div id="userAvatar"></div>
+    </div>
+  </header>
+
+  <div class="user-menu" id="userMenu">
+    <div class="user-menu-name" id="userMenuName"></div>
+    <div class="user-menu-item danger" onclick="doSignOut()">Sign out</div>
+  </div>
+
+  <main class="main">
+    <!-- GLOBAL PINNED VIEW -->
+    <div class="global-pinned-view" id="globalPinnedView">
+      <div class="back-nav" onclick="closeGlobalPinned()"><span>←</span><span>Back to Library</span></div>
+      <div class="global-pinned-header">Your <em>Pinned</em></div>
+      <div class="global-pinned-subtitle">All pinned documents across every binder</div>
+      <div id="globalPinnedContent"></div>
+    </div>
+
+    <div class="shelf-view" id="shelfView">
+      <div class="shelf-header">
+        <div>
+          <div class="shelf-title">Your <em>Library</em></div>
+          <div class="shelf-subtitle">All your binders, organized and searchable</div>
+        </div>
+      </div>
+      <div class="sort-bar">
+        <span class="sort-label">Sort:</span>
+        <button class="sort-btn active" data-sort="pinned" onclick="setSort('pinned')">📌 Pinned First</button>
+        <button class="sort-btn" data-sort="name" onclick="setSort('name')">A – Z</button>
+        <button class="sort-btn" data-sort="date" onclick="setSort('date')">Newest</button>
+        <button class="sort-btn" data-sort="updated" onclick="setSort('updated')">Recently Updated</button>
+        <button class="sort-btn" data-sort="docs" onclick="setSort('docs')">Most Docs</button>
+      </div>
+      <div class="recently-opened" id="recentlyOpenedSection" style="display:none;">
+        <div class="recently-label">Jump back in</div>
+        <div class="recently-row" id="recentlyOpenedRow"></div>
+      </div>
+      <div class="binder-grid" id="binderGrid"></div>
+    </div>
+
+    <div class="binder-view" id="binderView">
+      <div class="back-nav" onclick="goToShelf()"><span>←</span><span>Back to Shelf</span></div>
+      <div class="binder-topbar">
+        <div class="binder-name-display" id="binderNameDisplay"></div>
+        <button class="duplicate-binder-btn" onclick="duplicateBinder()" title="Duplicate this binder">⧉ Duplicate</button>
+        <button class="search-within-btn" onclick="openSearch()">🔍 Search this binder</button>
+      </div>
+      <div class="binder-chrome">
+        <div class="binder-spine-bar" id="binderSpineBar">
+          <div class="spine-ring-large"></div>
+          <div class="spine-ring-large"></div>
+          <div class="spine-ring-large"></div>
+        </div>
+        <div class="binder-content-area">
+          <div class="binder-content-header">
+            <div class="content-section-title" id="activeSectionTitle"></div>
+            <div class="content-actions">
+              <button class="content-btn primary" id="uploadBtn" onclick="triggerUpload()" style="display:none;">+ Add Document</button>
+            </div>
+          </div>
+          <div class="binder-page-area" id="binderPageArea"></div>
+        </div>
+        <div class="binder-tab-column" id="tabColumn"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SEARCH -->
+<div class="search-overlay" id="searchOverlay" onclick="closeSearchIfBackdrop(event)">
+  <div class="search-box">
+    <span>🔍</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search binders, tabs, documents…" oninput="doSearch(this.value)"/>
+    <button class="icon-btn" style="background:transparent;border:none;color:var(--text-secondary);" onclick="closeSearch()">✕</button>
+  </div>
+  <div class="search-results" id="searchResults" style="display:none;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- CREATE BINDER MODAL -->
+<div class="modal-backdrop" id="createBinderModal">
+  <div class="modal">
+    <div class="modal-title">New Binder</div>
+    <div class="form-group">
+      <label class="form-label">Binder Name</label>
+      <input class="form-input" type="text" id="binderNameInput" placeholder="e.g. ADP Procedures, Worker's Comp…"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cover Image (optional)</label>
+      <div class="cover-upload-area" id="coverUploadArea" onclick="document.getElementById('coverFileInput').click()">
+        <img id="coverPreviewImg" class="cover-preview-img"/>
+        <div id="coverUploadPrompt" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:22px;">🖼️</div>
+          <div>Tap to upload a cover image</div>
+          <div style="font-size:11px;">PNG, JPG supported</div>
+        </div>
+      </div>
+      <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="previewCover(event)"/>
+    </div>
+    <div class="form-group" id="coverFitGroup" style="display:none;">
+      <label class="form-label">Image Display</label>
+      <div style="display:flex;gap:8px;">
+        <div class="cover-fit-btn selected" data-fit="cover" onclick="selectCoverFit(this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--teal-bright);background:var(--teal-glow);color:var(--teal-bright);font-size:12px;font-weight:500;cursor:pointer;text-align:center;">Fill & Crop</div>
+        <div class="cover-fit-btn" data-fit="contain" onclick="selectCoverFit(this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--navy-border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;text-align:center;">Fit Whole Image</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tab Style</label>
+      <select class="form-input" id="tabStyleInput">
+        <option value="custom">Custom Labels</option>
+        <option value="alpha">A – Z</option>
+        <option value="numeric">1 – 31</option>
+        <option value="months">Months of the Year</option>
+        <option value="days">Days of the Week</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Spine Color</label>
+      <div class="color-picker-row" id="colorPicker">
+        <div class="color-dot selected" style="background:#1A2535" data-color="#1A2535" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#0F6E56" data-color="#0F6E56" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#BA7517" data-color="#BA7517" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#185FA5" data-color="#185FA5" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#8B1A1A" data-color="#8B1A1A" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#534AB7" data-color="#534AB7" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#993556" data-color="#993556" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#3B6D11" data-color="#3B6D11" onclick="selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Table of Contents</label>
+      <select class="form-input" id="tocInput">
+        <option value="yes">Yes — auto-generate from tabs</option>
+        <option value="no">No — jump straight to tabs</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('createBinderModal')">Cancel</button>
+      <button class="btn btn-primary" id="createBinderBtn" onclick="createBinder()">Create Binder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TAB MODAL -->
+<div class="modal-backdrop" id="addTabModal">
+  <div class="modal">
+    <div class="modal-title">Add Tab Divider</div>
+    <div class="form-group">
+      <label class="form-label">Tab Label</label>
+      <input class="form-input" type="text" id="tabLabelInput" placeholder="e.g. Rehire Process, Section A…"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tab Icon</label>
+      <div class="emoji-picker-wrap">
+        <div class="emoji-trigger-row">
+          <div class="emoji-trigger" id="emojiTrigger" onclick="toggleEmojiPanel()">📋</div>
+          <input class="form-input" type="text" id="tabIconInput" placeholder="Or type/paste any emoji" oninput="syncEmojiFromInput(this.value)" style="flex:1;"/>
+        </div>
+        <div class="emoji-panel" id="emojiPanel">
+          <input class="emoji-search" type="text" placeholder="Search emojis…" oninput="filterEmojis(this.value)"/>
+          <div class="emoji-scroll" id="emojiScroll"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tab Color</label>
+      <div class="tab-color-row" id="tabColorPicker" style="flex-wrap:wrap;gap:6px;">
+        <div class="tab-color-swatch selected" style="background:#0F6E56" data-color="#0F6E56" onclick="selectTabColor(this)" title="Forest Green"></div>
+        <div class="tab-color-swatch" style="background:#1D9E75" data-color="#1D9E75" onclick="selectTabColor(this)" title="Teal"></div>
+        <div class="tab-color-swatch" style="background:#5DCAA5" data-color="#5DCAA5" onclick="selectTabColor(this)" title="Mint"></div>
+        <div class="tab-color-swatch" style="background:#185FA5" data-color="#185FA5" onclick="selectTabColor(this)" title="Navy Blue"></div>
+        <div class="tab-color-swatch" style="background:#378ADD" data-color="#378ADD" onclick="selectTabColor(this)" title="Sky Blue"></div>
+        <div class="tab-color-swatch" style="background:#85B7EB" data-color="#85B7EB" onclick="selectTabColor(this)" title="Light Blue"></div>
+        <div class="tab-color-swatch" style="background:#534AB7" data-color="#534AB7" onclick="selectTabColor(this)" title="Purple"></div>
+        <div class="tab-color-swatch" style="background:#993556" data-color="#993556" onclick="selectTabColor(this)" title="Berry"></div>
+        <div class="tab-color-swatch" style="background:#D4537E" data-color="#D4537E" onclick="selectTabColor(this)" title="Pink"></div>
+        <div class="tab-color-swatch" style="background:#8B1A1A" data-color="#8B1A1A" onclick="selectTabColor(this)" title="Crimson"></div>
+        <div class="tab-color-swatch" style="background:#D85A30" data-color="#D85A30" onclick="selectTabColor(this)" title="Burnt Orange"></div>
+        <div class="tab-color-swatch" style="background:#BA7517" data-color="#BA7517" onclick="selectTabColor(this)" title="Amber"></div>
+        <div class="tab-color-swatch" style="background:#EF9F27" data-color="#EF9F27" onclick="selectTabColor(this)" title="Gold"></div>
+        <div class="tab-color-swatch" style="background:#3B6D11" data-color="#3B6D11" onclick="selectTabColor(this)" title="Olive"></div>
+        <div class="tab-color-swatch" style="background:#639922" data-color="#639922" onclick="selectTabColor(this)" title="Lime"></div>
+        <div class="tab-color-swatch" style="background:#1A2535" data-color="#1A2535" onclick="selectTabColor(this)" title="Midnight"></div>
+        <div class="tab-color-swatch" style="background:#444441" data-color="#444441" onclick="selectTabColor(this)" title="Charcoal"></div>
+        <div class="tab-color-swatch" style="background:#888780" data-color="#888780" onclick="selectTabColor(this)" title="Stone"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addTabModal')">Cancel</button>
+      <button class="btn btn-primary" id="addTabBtn" onclick="addTab()">Add Tab</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW -->
+<div class="img-preview-backdrop" id="imgPreviewBackdrop" onclick="closeImgPreview(event)">
+  <div class="img-preview-inner">
+    <button class="img-preview-close" onclick="closeImgPreview()">✕</button>
+    <img id="imgPreviewEl" src="" alt=""/>
+    <div class="img-preview-name" id="imgPreviewName"></div>
+  </div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="modal-backdrop" id="renameModal">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-title">Rename Document</div>
+    <div class="form-group">
+      <label class="form-label">New Name</label>
+      <input class="rename-input" type="text" id="renameInput" placeholder="Document name…"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('renameModal')">Cancel</button>
+      <button class="btn btn-primary" id="renameBtn" onclick="confirmRename()">Rename</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileUploadInput" style="display:none;" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.xlsx,.csv" onchange="handleFileUpload(event)"/>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw3TFVdIPtQ1dwsJx_59hxHfB4lHFJCYU",
+  authDomain: "mysagebinder.firebaseapp.com",
+  projectId: "mysagebinder",
+  storageBucket: "mysagebinder.firebasestorage.app",
+  messagingSenderId: "28800853065",
+  appId: "1:28800853065:web:21f5f7f635c0b6a8fccb98"
+};
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+let binders = [];
+let activeBinder = null;
+let activeTabId = null;
+let selectedColor = '#1A2535';
+let selectedTabColor = '#0F6E56';
+let selectedEmoji = '📋';
+let coverDataUrl = null;
+let coverFit = 'cover';
+let unsubBinders = null;
+
+// ── AUTH ──
+window.signInWithGoogle = async () => {
+  try { await signInWithPopup(auth, provider); }
+  catch(e) { showToast('Sign-in failed. Please try again.','error'); }
+};
+window.doSignOut = async () => {
+  document.getElementById('userMenu').classList.remove('open');
+  if (unsubBinders) unsubBinders();
+  await fbSignOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  document.getElementById('loadingScreen').style.display = 'none';
+  if (user) {
+    currentUser = user;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    const av = document.getElementById('userAvatar');
+    document.getElementById('userMenuName').textContent = user.displayName || user.email;
+    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" class="user-avatar" onclick="toggleUserMenu()"/>`;
+    else {
+      const ini = (user.displayName||user.email||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      av.innerHTML = `<div class="user-initials" onclick="toggleUserMenu()">${ini}</div>`;
+    }
+    loadBinders();
+  } else {
+    currentUser = null;
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('appShell').style.display = 'none';
+    if (unsubBinders) { unsubBinders(); unsubBinders = null; }
+  }
+});
+
+window.toggleUserMenu = () => document.getElementById('userMenu').classList.toggle('open');
+document.addEventListener('click', e => { if (!e.target.closest('#userMenu') && !e.target.closest('#userAvatar')) document.getElementById('userMenu').classList.remove('open'); });
+
+// ── PATHS ──
+const bindersCol = () => collection(db,'users',currentUser.uid,'binders');
+const tabsCol = (bid) => collection(db,'users',currentUser.uid,'binders',bid,'tabs');
+const docsCol = (bid,tid) => collection(db,'users',currentUser.uid,'binders',bid,'tabs',tid,'documents');
+
+// ── LOAD ──
+async function loadBinders() {
+  await fetchBinders();
+}
+
+async function fetchBinders() {
+  try {
+    const q = query(bindersCol(), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    const freshBinders = [];
+    for (const d of snap.docs) {
+      const b = { id:d.id, ...d.data(), tabs:[] };
+      const tsnap = await getDocs(query(tabsCol(d.id), orderBy('order')));
+      for (const t of tsnap.docs) {
+        const tab = { id:t.id, ...t.data(), docs:[] };
+        const dsnap = await getDocs(query(docsCol(d.id,t.id), orderBy('uploadedAt','desc')));
+        tab.docs = dsnap.docs.map(dd=>({id:dd.id,...dd.data()}));
+        b.tabs.push(tab);
+      }
+      freshBinders.push(b);
+    }
+    binders = freshBinders;
+    renderShelf();
+    if (activeBinder) {
+      const upd = binders.find(b=>b.id===activeBinder.id);
+      if (upd) {
+        activeBinder=upd;
+        renderTabs();
+        if(activeTabId==='toc') renderTOC();
+        else { const t=activeBinder.tabs.find(t=>t.id===activeTabId); if(t) renderDocs(t); }
+      }
+    }
+  } catch(e) { showToast('Error loading binders: '+e.message,'error'); }
+}
+
+// ── SHELF ──
+let currentSort = 'pinned';
+function getSortedBinders() {
+  const bs = [...binders];
+  if (currentSort === 'pinned') {
+    bs.sort((a,b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0);
+    });
+  } else if (currentSort === 'name') {
+    bs.sort((a,b) => a.name.localeCompare(b.name));
+  } else if (currentSort === 'date') {
+    bs.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+  } else if (currentSort === 'updated') {
+    bs.sort((a,b) => (b.updatedAt?.seconds||0) - (a.updatedAt?.seconds||0));
+  } else if (currentSort === 'docs') {
+    bs.sort((a,b) => countDocs(b) - countDocs(a));
+  }
+  return bs;
+}
+window.setSort = sort => {
+  currentSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === sort));
+  renderShelf();
+};
+function renderShelf() {
+  renderRecentlyOpened();
+  const grid = document.getElementById('binderGrid');
+  grid.innerHTML = '';
+  getSortedBinders().forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'binder-card' + (b.pinned ? ' binder-pinned' : '');
+    card.onclick = () => openBinder(b.id);
+    const tabs4 = b.tabs.slice(0,4).map(t=>`<div class="tab-stub" style="background:${t.color}">${t.icon||t.label.charAt(0)}</div>`).join('');
+    const coverStyle = getCoverStyle(b);
+    const coverInner = b.coverUrl ? '' : `<span style="font-family:var(--font-display);font-size:11px;font-style:italic;color:${b.color};">${b.tabs.length} section${b.tabs.length!==1?'s':''}</span>`;
+    card.innerHTML = `
+      <div class="binder-card-spine" style="background:${darken(b.color)}">
+        <div class="spine-ring"></div><div class="spine-ring"></div><div class="spine-ring"></div>
+      </div>
+      <button class="binder-card-pin" title="${b.pinned?'Unpin binder':'Pin to top'}">${b.pinned?'📌':'📍'}</button>
+      <button class="binder-card-edit" title="Edit binder">✏️</button>
+      <div class="binder-card-body">
+        <div class="binder-card-cover" style="${coverStyle}">
+          <div class="binder-tabs-preview">${tabs4}</div>${coverInner}
+        </div>
+        <div class="binder-card-name">${b.name}</div>
+        <div class="binder-card-meta">${countDocs(b)} doc${countDocs(b)!==1?'s':''}</div>
+      </div>`;
+    card.querySelector('.binder-card-pin').onclick = ev => { ev.stopPropagation(); toggleBinderPin(b.id, b.pinned); };
+    card.querySelector('.binder-card-edit').onclick = ev => { ev.stopPropagation(); openEditBinder(b.id); };
+    grid.appendChild(card);
+  });
+  const add = document.createElement('div');
+  add.className='add-binder-card'; add.onclick=openCreateBinder;
+  add.innerHTML='<div style="font-size:28px;">＋</div><div style="font-size:13px;font-weight:500;">New Binder</div>';
+  grid.appendChild(add);
+}
+
+// ── OPEN BINDER ──
+window.openBinder = id => {
+  activeBinder = binders.find(b=>b.id===id);
+  if (!activeBinder) return;
+  trackRecentlyOpened(activeBinder);
+  document.getElementById('shelfView').classList.add('hidden');
+  document.getElementById('binderView').classList.add('active');
+  document.getElementById('binderNameDisplay').textContent = activeBinder.name;
+  document.getElementById('binderSpineBar').style.background = activeBinder.color;
+  renderTabs();
+  // Reset drop zone for new binder
+  const pageArea = document.getElementById('binderPageArea');
+  pageArea._dropZoneReady = false;
+  initBinderDropZone();
+  if (activeBinder.hasToc) { activeTabId='toc'; renderTOC(); document.getElementById('uploadBtn').style.display='none'; }
+  else if (activeBinder.tabs.length) setActiveTab(activeBinder.tabs[0].id);
+  else renderEmptySection();
+};
+window.goToShelf = () => {
+  activeBinder=null; activeTabId=null;
+  document.getElementById('shelfView').classList.remove('hidden');
+  document.getElementById('binderView').classList.remove('active');
+};
+
+// ── TABS ──
+function renderTabs() {
+  const col = document.getElementById('tabColumn');
+  col.innerHTML='';
+  if (activeBinder.hasToc) {
+    const el = document.createElement('div');
+    el.className='binder-tab'+(activeTabId==='toc'?' active':'');
+    el.onclick=()=>{activeTabId='toc';renderTOC();document.getElementById('uploadBtn').style.display='none';renderTabs();};
+    el.innerHTML=`<div class="binder-tab-label" style="background:${activeBinder.color};color:#fff;border-color:${activeBinder.color};">📋 Contents</div>`;
+    col.appendChild(el);
+  }
+  activeBinder.tabs.forEach(tab => {
+    const el=document.createElement('div');
+    el.className='binder-tab'+(activeTabId===tab.id?' active':'');
+    el.onclick=()=>setActiveTab(tab.id);
+    const badge = tab.docs&&tab.docs.length>0 ? `<span class="tab-doc-badge">${tab.docs.length}</span>` : '';
+    el.innerHTML=`<div class="binder-tab-label" style="background:${tab.color};color:#fff;border-color:${tab.color};">${tab.icon?tab.icon+' ':''}${tab.label}${badge}</div>`;
+    makeTabDraggable(el, tab);
+    el.addEventListener('contextmenu', ev => { ev.preventDefault(); openTabCtxMenu(ev, tab); });
+    col.appendChild(el);
+  });
+  if (activeBinder.tabs.length > 1) {
+    const hint=document.createElement('div'); hint.className='reorder-hint'; hint.textContent='drag to reorder';
+    col.appendChild(hint);
+  }
+  const btn=document.createElement('div'); btn.className='tab-add-btn'; btn.textContent='+'; btn.onclick=openAddTab;
+  col.appendChild(btn);
+}
+
+function setActiveTab(tabId) {
+  activeTabId=tabId;
+  const tab=activeBinder.tabs.find(t=>t.id===tabId);
+  if (!tab) return;
+  renderTabs();
+  document.getElementById('activeSectionTitle').textContent=(tab.icon?tab.icon+' ':'')+tab.label;
+  document.getElementById('uploadBtn').style.display='inline-flex';
+  renderDocs(tab);
+}
+
+function renderTOC() {
+  document.getElementById('activeSectionTitle').textContent='📋 Table of Contents';
+  // Build pinned section
+  const allPinned = [];
+  activeBinder.tabs.forEach(t => { t.docs.filter(d=>d.pinned).forEach(d=>allPinned.push({d,t})); });
+  const pinnedHtml = allPinned.length ? `
+    <div class="pinned-section">
+      <div class="pinned-section-title">📌 Pinned Documents <span style="font-size:12px;font-weight:400;color:#718096;">(${allPinned.length})</span></div>
+      ${allPinned.map(({d,t})=>`
+        <div class="pinned-row" onclick="setActiveTab('${t.id}')">
+          <div class="pinned-row-icon">📄</div>
+          <div class="pinned-row-info">
+            <div class="pinned-row-name">${d.name}</div>
+            <div class="pinned-row-tab">${t.icon?t.icon+' ':''}${t.label}</div>
+          </div>
+          <span style="font-size:11px;color:var(--teal-dark);font-weight:500;">Open →</span>
+        </div>`).join('')}
+    </div>` : '';
+  const rows=activeBinder.tabs.map(t=>`<div class="toc-row" onclick="setActiveTab('${t.id}')"><div class="toc-dot" style="background:${t.color}"></div><div class="toc-name">${t.icon?t.icon+' ':''}${t.label}</div><div class="toc-count">${t.docs.length} doc${t.docs.length!==1?'s':''}</div></div>`).join('');
+  document.getElementById('binderPageArea').innerHTML=`${pinnedHtml}<div class="toc-section"><div class="toc-title">${activeBinder.name}</div>${rows||'<div style="color:#A0AEC0;font-size:13px;padding:8px 0;">No sections yet — add a tab to get started.</div>'}</div>`;
+}
+
+function renderDocs(tab) {
+  const area=document.getElementById('binderPageArea');
+  area.innerHTML='';
+  // Tab notes area
+  const notesWrap=document.createElement('div'); notesWrap.className='tab-notes-area';
+  const notesLabel=document.createElement('div'); notesLabel.className='tab-notes-label'; notesLabel.textContent='Section Notes';
+  const notesInput=document.createElement('textarea'); notesInput.className='tab-notes-input';
+  notesInput.placeholder='Add notes or context for this section…';
+  notesInput.value=tab.notes||'';
+  const notesSaved=document.createElement('div'); notesSaved.className='tab-notes-saved'; notesSaved.textContent='✓ Saved';
+  let notesTimer;
+  notesInput.addEventListener('input', () => {
+    clearTimeout(notesTimer);
+    notesTimer=setTimeout(async()=>{
+      try{
+        await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',tab.id),{notes:notesInput.value});
+        notesSaved.classList.add('show');
+        setTimeout(()=>notesSaved.classList.remove('show'),2000);
+      }catch(e){}
+    },800);
+  });
+  notesWrap.appendChild(notesLabel); notesWrap.appendChild(notesInput); notesWrap.appendChild(notesSaved);
+  area.appendChild(notesWrap);
+  const icons={pdf:'📄',doc:'📝',docx:'📝',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',txt:'📃',xlsx:'📊',csv:'📊'};
+  const imgExts=['png','jpg','jpeg','gif','webp'];
+  const cards=tab.docs.map(d=>{
+    const ext=(d.name||'').split('.').pop().toLowerCase();
+    const isImg=imgExts.includes(ext);
+    const el=document.createElement('div');
+    el.className='doc-card';
+    el.onclick=()=>{ if(isImg) window.previewImage(d.url,d.name); else window.openDoc(d.url); };
+    if (d.pinned) el.classList.add('pinned');
+    el.innerHTML=`
+      <button class="doc-pin-btn" title="${d.pinned?'Unpin':'Pin this document'}">${d.pinned?'📌':'📍'}</button>
+      <div class="doc-card-actions">
+        <button class="doc-action-btn rename" title="Rename">✏️</button>
+        <button class="doc-action-btn del" title="Delete">✕</button>
+      </div>
+      <div class="doc-icon">${icons[ext]||'📎'}</div>
+      <div class="doc-name">${d.name}</div>
+      <div class="doc-meta">${d.size||''}</div>
+      ${d.docNotes?`<div class="doc-notes-text" title="${d.docNotes}">${d.docNotes}</div>`:''}
+      <div style="display:flex;gap:4px;margin-top:4px;">
+        <button style="flex:1;padding:3px 0;border-radius:4px;border:1px solid #E2E8F0;background:#fff;color:#718096;font-size:10px;cursor:pointer;" title="Add notes">📝 Notes</button>
+        <button style="flex:1;padding:3px 0;border-radius:4px;border:1px solid #E2E8F0;background:#fff;color:#718096;font-size:10px;cursor:pointer;" title="Move to another tab">↗ Move</button>
+      </div>`;
+    el.querySelector('.doc-pin-btn').onclick=ev=>{ ev.stopPropagation(); window.togglePin(tab.id,d.id,d.pinned); };
+    el.querySelector('.rename').onclick=ev=>{ ev.stopPropagation(); window.startRename(tab.id,d.id,d.name); };
+    el.querySelector('.del').onclick=ev=>{ ev.stopPropagation(); window.deleteDocument(tab.id,d.id,d.storagePath||''); };
+    el.querySelectorAll('button')[3].onclick=ev=>{ ev.stopPropagation(); window.openDocNotes(tab.id,d.id,d.docNotes||'',d.name); };
+    el.querySelectorAll('button')[4].onclick=ev=>{ ev.stopPropagation(); window.openMoveDoc(tab.id,d.id,d.name); };
+    return el;
+  });
+  if(tab.docs.length){
+    const grid=document.createElement('div'); grid.className='doc-grid';
+    cards.forEach(c=>grid.appendChild(c));
+    const uploadTile=document.createElement('div'); uploadTile.className='doc-upload-trigger'; uploadTile.onclick=triggerUpload;
+    uploadTile.innerHTML='<div style="font-size:24px;">+</div><div style="font-size:11px;font-weight:500;">Add Document</div>';
+    grid.appendChild(uploadTile);
+    area.appendChild(grid);
+  } else {
+    area.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">No documents here yet.<br>Drag files here or click <strong>+ Add Document</strong> above.</div></div>';
+  }
+}
+
+function renderEmptySection() {
+  document.getElementById('activeSectionTitle').textContent='No sections yet';
+  document.getElementById('uploadBtn').style.display='none';
+  document.getElementById('binderPageArea').innerHTML=`<div class="empty-state"><div class="empty-icon">🗂️</div><div class="empty-text">Add your first tab using the <strong>+</strong> on the left.</div></div>`;
+}
+
+window.openDoc = url => { if(url) window.open(url,'_blank'); };
+
+// ── CREATE BINDER ──
+window.openCreateBinder = () => {
+  document.getElementById('binderNameInput').value='';
+  coverDataUrl=null;
+  coverFit='cover';
+  document.getElementById('coverPreviewImg').style.display='none';
+  document.getElementById('coverUploadPrompt').style.display='flex';
+  document.getElementById('coverFitGroup').style.display='none';
+  document.querySelectorAll('.cover-fit-btn').forEach((b,i) => {
+    const isFirst = i===0;
+    b.style.borderColor = isFirst?'var(--teal-bright)':'var(--navy-border)';
+    b.style.background = isFirst?'var(--teal-glow)':'transparent';
+    b.style.color = isFirst?'var(--teal-bright)':'var(--text-secondary)';
+  });
+  openModal('createBinderModal');
+};
+window.previewCover = e => {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    coverDataUrl=ev.target.result;
+    const img=document.getElementById('coverPreviewImg');
+    img.src=coverDataUrl; img.style.display='block';
+    document.getElementById('coverUploadPrompt').style.display='none';
+  };
+  reader.readAsDataURL(file);
+};
+window.createBinder = async () => {
+  const name=document.getElementById('binderNameInput').value.trim();
+  if(!name){document.getElementById('binderNameInput').focus();return;}
+  const btn=document.getElementById('createBinderBtn'); btn.textContent='Creating…'; btn.disabled=true;
+  try {
+    const tabStyle=document.getElementById('tabStyleInput').value;
+    const hasToc=document.getElementById('tocInput').value==='yes';
+    let coverUrl=null;
+    if(coverDataUrl){
+      const blob=await(await fetch(coverDataUrl)).blob();
+      const sr=storageRef(storage,`users/${currentUser.uid}/covers/${Date.now()}`);
+      await new Promise((res,rej)=>{
+        const task=uploadBytesResumable(sr,blob);
+        task.on('state_changed',null,rej,async()=>{coverUrl=await getDownloadURL(task.snapshot.ref);res();});
+      });
+    }
+    const bref=await addDoc(bindersCol(),{name,color:selectedColor,tabStyle,hasToc,coverUrl,coverFit:coverDataUrl?coverFit:'cover',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+    const presets=getPresets(tabStyle);
+    for(let i=0;i<presets.length;i++) await addDoc(tabsCol(bref.id),{...presets[i],order:i,createdAt:serverTimestamp()});
+    closeModal('createBinderModal');
+    showToast('Binder created!','success');
+    await fetchBinders();
+    setTimeout(()=>openBinder(bref.id),300);
+  } catch(e){showToast('Error: '+e.message,'error');}
+  btn.textContent='Create Binder'; btn.disabled=false;
+};
+const PALETTE=['#0F6E56','#185FA5','#BA7517','#8B1A1A','#534AB7','#993556','#3B6D11','#1A2535'];
+function getPresets(style){
+  const mk=(label,i)=>({label,color:PALETTE[i%PALETTE.length],icon:''});
+  if(style==='alpha') return [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(mk);
+  if(style==='numeric') return Array.from({length:31},(_,i)=>mk(String(i+1),i));
+  if(style==='months') return ['January','February','March','April','May','June','July','August','September','October','November','December'].map(mk);
+  if(style==='days') return ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(mk);
+  return [];
+}
+
+// ── ADD TAB ──
+window.openAddTab = () => {
+  document.getElementById('tabLabelInput').value='';
+  document.getElementById('tabIconInput').value='';
+  selectedEmoji='📋'; document.getElementById('emojiTrigger').textContent='📋';
+  openModal('addTabModal');
+};
+window.addTab = async () => {
+  const label=document.getElementById('tabLabelInput').value.trim();
+  if(!label){document.getElementById('tabLabelInput').focus();return;}
+  const btn=document.getElementById('addTabBtn'); btn.textContent='Adding…'; btn.disabled=true;
+  try {
+    const icon=document.getElementById('tabIconInput').value.trim()||selectedEmoji;
+    await addDoc(tabsCol(activeBinder.id),{label,color:selectedTabColor,icon,order:activeBinder.tabs.length,createdAt:serverTimestamp()});
+    await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id),{updatedAt:serverTimestamp()});
+    closeModal('addTabModal');
+    showToast('Tab added!','success');
+    await fetchBinders();
+    const newTab = activeBinder ? activeBinder.tabs[activeBinder.tabs.length-1] : null;
+    if(newTab) setActiveTab(newTab.id);
+  } catch(e){showToast('Error: '+e.message,'error');}
+  btn.textContent='Add Tab'; btn.disabled=false;
+};
+
+// ── UPLOAD ──
+let isUploading = false;
+window.triggerUpload = () => {
+  if (isUploading) return;
+  document.getElementById('fileUploadInput').click();
+};
+window.handleFileUpload = async e => {
+  if (isUploading) { e.target.value=''; return; }
+  const tab=activeBinder.tabs.find(t=>t.id===activeTabId); if(!tab) return;
+  const files=Array.from(e.target.files);
+  if(!files.length) return;
+  e.target.value='';
+  isUploading = true;
+  const tabId=tab.id;
+  const binderId=activeBinder.id;
+  let anyUploaded=false;
+  for(const file of files){
+    const pid='prog_'+Date.now()+Math.random();
+    addProg(pid,file.name);
+    try{
+      const path=`users/${currentUser.uid}/binders/${binderId}/tabs/${tabId}/${Date.now()}_${file.name}`;
+      const sr=storageRef(storage,path);
+      const task=uploadBytesResumable(sr,file);
+      await new Promise((res,rej)=>task.on('state_changed',
+        snap=>updProg(pid,Math.round(snap.bytesTransferred/snap.totalBytes*100)),
+        rej,
+        async()=>{
+          const url=await getDownloadURL(task.snapshot.ref);
+          await addDoc(docsCol(binderId,tabId),{name:file.name,size:fmtSize(file.size),url,storagePath:path,uploadedAt:serverTimestamp()});
+          await updateDoc(doc(db,'users',currentUser.uid,'binders',binderId),{updatedAt:serverTimestamp()});
+          rmProg(pid); res();
+        }
+      ));
+      anyUploaded=true;
+      showToast(file.name+' uploaded!','success');
+    }catch(err){rmProg(pid);showToast('Upload failed: '+err.message,'error');}
+  }
+  isUploading = false;
+  isUploading = false;
+  if(anyUploaded){
+    await fetchBinders();
+    const updatedTab=activeBinder.tabs.find(t=>t.id===tabId);
+    if(updatedTab) renderDocs(updatedTab);
+  }
+};
+function addProg(id,name){const a=document.getElementById('binderPageArea');const el=document.createElement('div');el.className='upload-progress';el.id=id;el.innerHTML=`<div class="upload-progress-name">⬆️ ${name}</div><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>`;a.prepend(el);}
+function updProg(id,pct){const el=document.getElementById(id);if(el)el.querySelector('.progress-fill').style.width=pct+'%';}
+function rmProg(id){const el=document.getElementById(id);if(el)el.remove();}
+window.deleteDocument = async (tabId,docId,path) => {
+  if(!confirm('Delete this document? You\'ll have 10 seconds to undo.')) return;
+  const binderId = activeBinder.id;
+  try{
+    // Get doc data before deleting for undo
+    const tab = activeBinder.tabs.find(t=>t.id===tabId);
+    const docData = tab ? tab.docs.find(d=>d.id===docId) : null;
+    await deleteDoc(doc(db,'users',currentUser.uid,'binders',binderId,'tabs',tabId,'documents',docId));
+    await fetchBinders();
+    showUndoToast(`"${docData?.name||'Document'}" deleted`, async () => {
+      if (docData) {
+        await addDoc(collection(db,'users',currentUser.uid,'binders',binderId,'tabs',tabId,'documents'),{
+          name: docData.name, size: docData.size||'', url: docData.url||'',
+          storagePath: docData.storagePath||'', uploadedAt: serverTimestamp()
+        });
+        await fetchBinders();
+      }
+    });
+  }catch(e){showToast('Error: '+e.message,'error');}
+};
+
+// ── EMOJI PICKER ──
+const EMOJIS={
+  'Office & Filing':['📁','📂','🗂️','📋','📌','📍','📎','🖇️','📏','📐','✂️','🗃️','🗄️','🗑️'],
+  'Documents':['📄','📃','📑','📊','📈','📉','📝','✏️','🖊️','🖋️','📖','📚','📰','🗞️'],
+  'HR & People':['👤','👥','🧑‍💼','👩‍💼','🤝','💼','🏢','📣','📢','🏷️','🎫','🪪'],
+  'Legal & Medical':['⚖️','🏛️','🔏','🔐','🔒','🩺','🏥','💊','🚑','🩹','📜','⚕️'],
+  'Finance':['💰','💵','💳','🏦','📊','💹','🧾','💱','🤑','💲'],
+  'Calendar & Time':['📅','📆','🗓️','⏰','⌚','⏱️','⏳','🕐','🗒️'],
+  'Status & Flags':['✅','❌','⚠️','🔴','🟡','🟢','🔵','🟣','⭐','🚩','🏁','💡','🔔','🔕'],
+  'Misc':['🔍','🔎','💬','💭','📬','📮','📫','🔧','⚙️','🛠️','🔑','🗝️','🏠','🎯']
+};
+function buildEmojiPanel(){
+  const scroll=document.getElementById('emojiScroll'); scroll.innerHTML='';
+  Object.entries(EMOJIS).forEach(([cat,emojis])=>{
+    const lbl=document.createElement('div'); lbl.className='emoji-category-label'; lbl.textContent=cat;
+    const grid=document.createElement('div'); grid.className='emoji-grid';
+    emojis.forEach(em=>{const b=document.createElement('button');b.className='emoji-btn';b.textContent=em;b.onclick=()=>pickEmoji(em);grid.appendChild(b);});
+    scroll.appendChild(lbl); scroll.appendChild(grid);
+  });
+}
+window.toggleEmojiPanel=()=>{const p=document.getElementById('emojiPanel');p.classList.toggle('open');if(p.classList.contains('open'))buildEmojiPanel();};
+window.filterEmojis=q=>{
+  const scroll=document.getElementById('emojiScroll');
+  if(!q.trim()){buildEmojiPanel();return;}
+  scroll.innerHTML='';
+  const grid=document.createElement('div'); grid.className='emoji-grid';
+  Object.values(EMOJIS).flat().forEach(em=>{const b=document.createElement('button');b.className='emoji-btn';b.textContent=em;b.onclick=()=>pickEmoji(em);grid.appendChild(b);});
+  scroll.appendChild(grid);
+};
+function pickEmoji(em){selectedEmoji=em;document.getElementById('emojiTrigger').textContent=em;document.getElementById('tabIconInput').value=em;document.getElementById('emojiPanel').classList.remove('open');}
+window.syncEmojiFromInput=val=>{const chars=[...val];if(chars.length>0){selectedEmoji=chars[0];document.getElementById('emojiTrigger').textContent=chars[0];}};
+document.addEventListener('click',e=>{if(!e.target.closest('.emoji-picker-wrap'))document.getElementById('emojiPanel')?.classList.remove('open');});
+
+// ── SEARCH ──
+window.openSearch=()=>{document.getElementById('searchOverlay').classList.add('open');document.getElementById('searchInput').focus();};
+window.closeSearch=()=>{document.getElementById('searchOverlay').classList.remove('open');document.getElementById('searchResults').style.display='none';};
+window.closeSearchIfBackdrop=e=>{if(e.target===document.getElementById('searchOverlay'))closeSearch();};
+window.doSearch=q=>{
+  const res=document.getElementById('searchResults');
+  if(!q.trim()){res.style.display='none';return;}
+  const hits=[];
+  binders.forEach(b=>{
+    if(b.name.toLowerCase().includes(q.toLowerCase())) hits.push({binder:b.name,name:b.name,type:'binder',binderId:b.id,tabId:null});
+    b.tabs.forEach(t=>{
+      if(t.label.toLowerCase().includes(q.toLowerCase())) hits.push({binder:b.name,name:t.label,type:'tab',binderId:b.id,tabId:t.id});
+      t.docs.forEach(d=>{if((d.name||'').toLowerCase().includes(q.toLowerCase())) hits.push({binder:b.name,name:d.name,type:'document',binderId:b.id,tabId:t.id});});
+    });
+  });
+  if(!hits.length){res.innerHTML='<div class="search-result-item"><div class="sr-name" style="color:#718096;">No results found</div></div>';res.style.display='block';return;}
+  res.innerHTML=hits.slice(0,8).map(h=>`<div class="search-result-item" onclick="goToResult('${h.binderId}','${h.tabId||''}')"><div class="sr-binder">${h.binder} · ${h.type}</div><div class="sr-name">${h.name}</div></div>`).join('');
+  res.style.display='block';
+};
+window.goToResult=(binderId,tabId)=>{closeSearch();openBinder(binderId);if(tabId)setTimeout(()=>setActiveTab(tabId),150);};
+
+// ── COLOR PICKERS ──
+window.selectColor=el=>{document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));el.classList.add('selected');selectedColor=el.dataset.color;};
+window.selectTabColor=el=>{document.querySelectorAll('.tab-color-swatch').forEach(d=>d.classList.remove('selected'));el.classList.add('selected');selectedTabColor=el.dataset.color;};
+
+// ── MODALS ──
+window.openModal=id=>document.getElementById(id).classList.add('open');
+window.closeModal=id=>document.getElementById(id).classList.remove('open');
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'));closeSearch();}});
+
+// ── HELPERS ──
+function countDocs(b){return b.tabs.reduce((s,t)=>s+t.docs.length,0);}
+function darken(hex){const n=parseInt(hex.slice(1),16);const r=Math.max(0,((n>>16)&255)-40),g=Math.max(0,((n>>8)&255)-40),b=Math.max(0,(n&255)-40);return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;}
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return Math.round(b/1024)+' KB';return (b/1048576).toFixed(1)+' MB';}
+let toastTimer;
+window.showToast=(msg,type='')=>{const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');requestAnimationFrame(()=>t.classList.add('show'));clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);};
+window.setActiveTab=setActiveTab;
+
+// ── PHASE 7: RECENTLY OPENED ──
+const RECENT_KEY = 'af_recently_opened';
+const MAX_RECENT = 5;
+
+function trackRecentlyOpened(binder) {
+  try {
+    let recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    recent = recent.filter(r => r.id !== binder.id);
+    recent.unshift({ id: binder.id, name: binder.name, color: binder.color, openedAt: Date.now() });
+    recent = recent.slice(0, MAX_RECENT);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+  } catch(e) {}
+}
+
+function renderRecentlyOpened() {
+  try {
+    const recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    const section = document.getElementById('recentlyOpenedSection');
+    const row = document.getElementById('recentlyOpenedRow');
+    if (!recent.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    row.innerHTML = '';
+    recent.forEach(r => {
+      const b = binders.find(x => x.id === r.id);
+      if (!b) return;
+      const chip = document.createElement('div');
+      chip.className = 'recently-chip';
+      const elapsed = Date.now() - r.openedAt;
+      const timeStr = elapsed < 60000 ? 'just now' : elapsed < 3600000 ? Math.floor(elapsed/60000)+'m ago' : elapsed < 86400000 ? Math.floor(elapsed/3600000)+'h ago' : Math.floor(elapsed/86400000)+'d ago';
+      chip.innerHTML = `<div class="recently-chip-dot" style="background:${r.color}"></div><div class="recently-chip-name">${r.name}</div><div class="recently-chip-time">${timeStr}</div>`;
+      chip.onclick = () => openBinder(r.id);
+      row.appendChild(chip);
+    });
+  } catch(e) {}
+}
+
+// ── PHASE 7: DUPLICATE BINDER ──
+window.duplicateBinder = async () => {
+  if (!activeBinder) return;
+  if (!confirm(`Duplicate "${activeBinder.name}"? A copy will be created with the same tabs but no documents.`)) return;
+  try {
+    const newRef = await addDoc(bindersCol(), {
+      name: activeBinder.name + ' (Copy)',
+      color: activeBinder.color,
+      tabStyle: activeBinder.tabStyle,
+      hasToc: activeBinder.hasToc,
+      coverUrl: activeBinder.coverUrl || null,
+      coverFit: activeBinder.coverFit || 'cover',
+      pinned: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    for (let i = 0; i < activeBinder.tabs.length; i++) {
+      const t = activeBinder.tabs[i];
+      await addDoc(tabsCol(newRef.id), {
+        label: t.label, icon: t.icon||'', color: t.color,
+        order: i, notes: t.notes||'', createdAt: serverTimestamp()
+      });
+    }
+    await fetchBinders();
+    showToast('Binder duplicated! 🎉', 'success');
+    goToShelf();
+    setTimeout(() => openBinder(newRef.id), 400);
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// ── PHASE 7: MOVE DOCUMENT ──
+let moveDocContext = null;
+window.openMoveDoc = (tabId, docId, docName) => {
+  moveDocContext = { tabId, docId };
+  document.getElementById('moveDocName').textContent = docName;
+  const list = document.getElementById('moveDocTabList');
+  list.innerHTML = '';
+  activeBinder.tabs.filter(t => t.id !== tabId).forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'move-doc-tab-item';
+    item.innerHTML = `<div class="move-doc-tab-dot" style="background:${t.color}"></div><div class="move-doc-tab-label">${t.icon?t.icon+' ':''}${t.label}</div><div class="move-doc-tab-count">${t.docs.length} doc${t.docs.length!==1?'s':''}</div>`;
+    item.onclick = () => confirmMoveDoc(t.id);
+    list.appendChild(item);
+  });
+  if (!activeBinder.tabs.filter(t=>t.id!==tabId).length) {
+    list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:12px 0;">No other tabs to move to. Add another tab first.</div>';
+  }
+  openModal('moveDocModal');
+};
+
+async function confirmMoveDoc(toTabId) {
+  if (!moveDocContext) return;
+  const { tabId: fromTabId, docId } = moveDocContext;
+  const fromTab = activeBinder.tabs.find(t => t.id === fromTabId);
+  const docData = fromTab?.docs.find(d => d.id === docId);
+  if (!docData) return;
+  try {
+    await addDoc(docsCol(activeBinder.id, toTabId), {
+      name: docData.name, size: docData.size||'', url: docData.url||'',
+      storagePath: docData.storagePath||'', pinned: docData.pinned||false,
+      docNotes: docData.docNotes||'', uploadedAt: serverTimestamp()
+    });
+    await deleteDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',fromTabId,'documents',docId));
+    await fetchBinders();
+    closeModal('moveDocModal');
+    setActiveTab(fromTabId);
+    showToast('Document moved!', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ── PHASE 7: DOCUMENT NOTES ──
+let docNotesContext = null;
+window.openDocNotes = (tabId, docId, currentNotes, docName) => {
+  docNotesContext = { tabId, docId };
+  document.getElementById('docNotesInput').value = currentNotes || '';
+  openModal('docNotesModal');
+  setTimeout(() => document.getElementById('docNotesInput').focus(), 100);
+};
+window.saveDocNotes = async () => {
+  if (!docNotesContext) return;
+  const notes = document.getElementById('docNotesInput').value.trim();
+  const btn = document.getElementById('saveDocNotesBtn'); btn.textContent='Saving…'; btn.disabled=true;
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',docNotesContext.tabId,'documents',docNotesContext.docId), { docNotes: notes });
+    await fetchBinders();
+    closeModal('docNotesModal');
+    const updatedTab = activeBinder.tabs.find(t=>t.id===activeTabId);
+    if(updatedTab) renderDocs(updatedTab);
+    showToast('Notes saved!', 'success');
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+  btn.textContent='Save Notes'; btn.disabled=false;
+};
+
+
+// ── PHASE 6: BINDER PIN ──
+async function toggleBinderPin(binderId, currentlyPinned) {
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid,'binders',binderId),{pinned:!currentlyPinned,updatedAt:serverTimestamp()});
+    await fetchBinders();
+    showToast(currentlyPinned?'Binder unpinned':'Binder pinned to top! 📌','success');
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+}
+
+
+// ── PINNED / FAVORITES ──
+window.togglePin = async (tabId, docId, currentlyPinned) => {
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',tabId,'documents',docId), {
+      pinned: !currentlyPinned
+    });
+    await fetchBinders();
+    const updatedTab = activeBinder.tabs.find(t=>t.id===activeTabId);
+    if (updatedTab) renderDocs(updatedTab);
+    else if (activeTabId==='toc') renderTOC();
+    showToast(currentlyPinned ? 'Unpinned' : 'Pinned! 📌', currentlyPinned ? '' : 'success');
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+};
+
+// ── GLOBAL PINNED VIEW ──
+window.openGlobalPinned = () => {
+  document.getElementById('shelfView').classList.add('hidden');
+  document.getElementById('binderView').classList.remove('active');
+  document.getElementById('globalPinnedView').classList.add('active');
+  renderGlobalPinned();
+};
+
+window.closeGlobalPinned = () => {
+  document.getElementById('globalPinnedView').classList.remove('active');
+  document.getElementById('shelfView').classList.remove('hidden');
+};
+
+function renderGlobalPinned() {
+  const container = document.getElementById('globalPinnedContent');
+  const groups = [];
+  binders.forEach(b => {
+    const pinned = [];
+    b.tabs.forEach(t => {
+      t.docs.filter(d=>d.pinned).forEach(d => pinned.push({d,t,b}));
+    });
+    if (pinned.length) groups.push({b, pinned});
+  });
+
+  if (!groups.length) {
+    container.innerHTML = `<div class="empty-state" style="color:var(--text-muted);">
+      <div class="empty-icon">📌</div>
+      <div class="empty-text">No pinned documents yet.<br>Open a binder and pin your most important files.</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  groups.forEach(({b, pinned}) => {
+    const group = document.createElement('div');
+    group.className = 'global-pinned-binder-group';
+    const icons = {pdf:'📄',doc:'📝',docx:'📝',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',txt:'📃',xlsx:'📊',csv:'📊'};
+    group.innerHTML = `
+      <div class="global-pinned-binder-name" style="color:${b.color};">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${b.color};margin-right:6px;"></span>
+        ${b.name}
+      </div>
+      ${pinned.map(({d,t})=>`
+        <div class="pinned-row" onclick="openBinderToDoc('${b.id}','${t.id}')">
+          <div class="pinned-row-icon">${icons[(d.name||'').split('.').pop().toLowerCase()]||'📎'}</div>
+          <div class="pinned-row-info">
+            <div class="pinned-row-name">${d.name}</div>
+            <div class="pinned-row-tab">${t.icon?t.icon+' ':''}${t.label}</div>
+          </div>
+          <span style="font-size:11px;color:var(--teal-bright);font-weight:500;">Open →</span>
+        </div>`).join('')}`;
+    container.appendChild(group);
+  });
+}
+
+window.openBinderToDoc = (binderId, tabId) => {
+  closeGlobalPinned();
+  openBinder(binderId);
+  setTimeout(() => setActiveTab(tabId), 300);
+};
+
+
+// ── PROTECTION: SOFT DELETE WITH UNDO ──
+let undoStack = null;
+let undoTimer = null;
+let undoProgressTimer = null;
+const UNDO_DELAY = 10000;
+
+function showUndoToast(msg, undoFn) {
+  clearTimeout(undoTimer);
+  clearInterval(undoProgressTimer);
+  undoStack = undoFn;
+  document.getElementById('undoToastMsg').textContent = msg;
+  const toast = document.getElementById('undoToast');
+  const progress = document.getElementById('undoProgress');
+  progress.style.transition = 'none';
+  progress.style.width = '100%';
+  toast.classList.add('show');
+  requestAnimationFrame(() => {
+    progress.style.transition = `width ${UNDO_DELAY}ms linear`;
+    progress.style.width = '0%';
+  });
+  undoTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    undoStack = null;
+  }, UNDO_DELAY);
+}
+
+window.doUndo = async () => {
+  clearTimeout(undoTimer);
+  clearInterval(undoProgressTimer);
+  document.getElementById('undoToast').classList.remove('show');
+  if (undoStack) {
+    await undoStack();
+    undoStack = null;
+    showToast('Restored!', 'success');
+  }
+};
+
+// ── SYNC: OPEN MODAL ──
+const LAST_BACKUP_KEY = 'af_last_backup';
+window.openSyncModal = () => {
+  const last = localStorage.getItem(LAST_BACKUP_KEY);
+  const lastEl = document.getElementById('syncLastBackup');
+  if (last) {
+    const d = new Date(last);
+    lastEl.textContent = `Last backup: ${d.toLocaleDateString()} at ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+  } else {
+    lastEl.textContent = 'No backup yet — we recommend weekly exports.';
+  }
+  document.getElementById('syncImportResult').style.display = 'none';
+  openModal('syncModal');
+};
+
+// ── SYNC: EXPORT ──
+window.doExportLibrary = async () => {
+  try {
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      appVersion: 'AureliaFolio',
+      binders: binders.map(b => ({
+        id: b.id,
+        name: b.name,
+        color: b.color,
+        tabStyle: b.tabStyle,
+        hasToc: b.hasToc,
+        coverUrl: b.coverUrl || null,
+        coverFit: b.coverFit || 'cover',
+        pinned: b.pinned || false,
+        tabs: b.tabs.map(t => ({
+          id: t.id,
+          label: t.label,
+          icon: t.icon || '',
+          color: t.color,
+          order: t.order,
+          notes: t.notes || '',
+          documents: t.docs.map(d => ({
+            id: d.id,
+            name: d.name,
+            size: d.size || '',
+            url: d.url || '',
+            storagePath: d.storagePath || '',
+            pinned: d.pinned || false,
+            docNotes: d.docNotes || '',
+            uploadedAt: d.uploadedAt || null
+          }))
+        }))
+      }))
+    };
+    const json = JSON.stringify(backup, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toISOString().slice(0,10);
+    a.download = `AureliaFolio_Backup_${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    const now = new Date().toISOString();
+    localStorage.setItem(LAST_BACKUP_KEY, now);
+    const lastEl = document.getElementById('syncLastBackup');
+    if (lastEl) lastEl.textContent = `Last backup: just now`;
+    showToast('Backup downloaded! 💾', 'success');
+  } catch(e) {
+    showToast('Backup failed: ' + e.message, 'error');
+  }
+};
+
+// ── SYNC: IMPORT ──
+window.doImportLibrary = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  e.target.value = '';
+  const resultEl = document.getElementById('syncImportResult');
+  resultEl.style.display = 'none';
+  try {
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    if (!backup.binders || !Array.isArray(backup.binders)) {
+      throw new Error('Invalid backup file — binders not found.');
+    }
+    const existingNames = new Set(binders.map(b => b.name.toLowerCase()));
+    let added = 0; let skipped = 0;
+    for (const b of backup.binders) {
+      if (existingNames.has(b.name.toLowerCase())) { skipped++; continue; }
+      const newRef = await addDoc(bindersCol(), {
+        name: b.name,
+        color: b.color || '#1A2535',
+        tabStyle: b.tabStyle || 'custom',
+        hasToc: b.hasToc !== false,
+        coverUrl: b.coverUrl || null,
+        coverFit: b.coverFit || 'cover',
+        pinned: b.pinned || false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      if (b.tabs && Array.isArray(b.tabs)) {
+        for (let i = 0; i < b.tabs.length; i++) {
+          const t = b.tabs[i];
+          const tabRef = await addDoc(tabsCol(newRef.id), {
+            label: t.label || 'Section',
+            icon: t.icon || '',
+            color: t.color || '#0F6E56',
+            order: t.order ?? i,
+            notes: t.notes || '',
+            createdAt: serverTimestamp()
+          });
+          if (t.documents && Array.isArray(t.documents)) {
+            for (const d of t.documents) {
+              await addDoc(docsCol(newRef.id, tabRef.id), {
+                name: d.name || 'Document',
+                size: d.size || '',
+                url: d.url || '',
+                storagePath: d.storagePath || '',
+                pinned: d.pinned || false,
+                docNotes: d.docNotes || '',
+                uploadedAt: serverTimestamp()
+              });
+            }
+          }
+        }
+      }
+      added++;
+    }
+    await fetchBinders();
+    resultEl.className = 'sync-import-result success';
+    resultEl.innerHTML = `✅ Import complete!<br>${added} binder${added!==1?'s':''} added${skipped ? `, ${skipped} skipped (already exist)` : ''}.`;
+    resultEl.style.display = 'block';
+    showToast(`Imported ${added} binder${added!==1?'s':''}!`, 'success');
+  } catch(e) {
+    resultEl.className = 'sync-import-result error';
+    resultEl.innerHTML = `❌ Import failed: ${e.message}`;
+    resultEl.style.display = 'block';
+  }
+};
+
+// Keep exportLibrary as alias for backwards compatibility
+window.exportLibrary = window.doExportLibrary;
+
+
+// ── PHASE 5: PWA INSTALL ──
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner after 3 seconds if user hasn't dismissed
+  const dismissed = localStorage.getItem('af_install_dismissed');
+  if (!dismissed) setTimeout(() => document.getElementById('installBanner').classList.add('show'), 3000);
+});
+window.doInstall = async () => {
+  document.getElementById('installBanner').classList.remove('show');
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') showToast('AureliaFolio installed!', 'success');
+  deferredPrompt = null;
+};
+window.dismissInstall = () => {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('af_install_dismissed', '1');
+};
+window.addEventListener('appinstalled', () => {
+  showToast('AureliaFolio installed successfully!', 'success');
+  deferredPrompt = null;
+});
+
+// ── PHASE 5: OFFLINE DETECTION ──
+function updateOnlineStatus() {
+  const bar = document.getElementById('offlineBar');
+  if (!navigator.onLine) bar.classList.add('show');
+  else bar.classList.remove('show');
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ── PHASE 5: SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+
+// ── PHASE 4: COVER GALLERY ──
+const COVER_DESIGNS = [
+  {label:'Midnight Navy', style:'background:linear-gradient(135deg,#0F1824 0%,#1D9E75 100%)'},
+  {label:'Deep Teal', style:'background:linear-gradient(135deg,#0F6E56 0%,#5DCAA5 100%)'},
+  {label:'Amber Dusk', style:'background:linear-gradient(135deg,#2C1810 0%,#BA7517 100%)'},
+  {label:'Crimson', style:'background:linear-gradient(135deg,#3D0A0A 0%,#8B1A1A 100%)'},
+  {label:'Royal Blue', style:'background:linear-gradient(135deg,#042C53 0%,#378ADD 100%)'},
+  {label:'Plum', style:'background:linear-gradient(135deg,#26215C 0%,#993556 100%)'},
+  {label:'Forest', style:'background:linear-gradient(135deg,#0A1F0A 0%,#3B6D11 100%)'},
+  {label:'Slate', style:'background:linear-gradient(135deg,#1A2535 0%,#6B849E 100%)'},
+  {label:'Warm Gold', style:'background:linear-gradient(135deg,#1A1000 0%,#EF9F27 100%)'},
+];
+let editCoverMode = 'gallery'; // 'gallery' | 'upload' | 'none'
+let editCoverDataUrl = null;
+let editCoverGalleryIndex = null;
+let editBinderContext = null;
+let editTabContext = null;
+let editSelectedColor = '#1A2535';
+let editSelectedTabColor = '#0F6E56';
+let editSelectedEmoji = '📋';
+
+function buildCoverGallery(selectedIdx) {
+  const gallery = document.getElementById('coverGallery');
+  gallery.innerHTML = '';
+  COVER_DESIGNS.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'cover-gallery-item' + (i === selectedIdx ? ' selected' : '');
+    el.setAttribute('style', d.style);
+    el.textContent = d.label;
+    el.onclick = () => {
+      document.querySelectorAll('.cover-gallery-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      editCoverGalleryIndex = i;
+      editCoverDataUrl = null;
+    };
+    gallery.appendChild(el);
+  });
+}
+
+window.switchCoverTab = mode => {
+  editCoverMode = mode;
+  ['gallery','upload','none'].forEach(m => {
+    document.getElementById('coverTab' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode);
+    document.getElementById('cover' + m.charAt(0).toUpperCase() + m.slice(1) + 'Panel').style.display = m === mode ? 'block' : 'none';
+  });
+};
+
+let editCoverFit = 'cover';
+window.selectEditCoverFit = el => {
+  document.querySelectorAll('.cover-fit-btn-edit').forEach(b => {
+    b.style.borderColor = 'var(--navy-border)';
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text-secondary)';
+  });
+  el.style.borderColor = 'var(--teal-bright)';
+  el.style.background = 'var(--teal-glow)';
+  el.style.color = 'var(--teal-bright)';
+  editCoverFit = el.dataset.fit;
+};
+window.previewEditCover = e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    editCoverDataUrl = ev.target.result;
+    editCoverGalleryIndex = null;
+    const img = document.getElementById('editCoverPreviewImg');
+    img.src = editCoverDataUrl; img.style.display = 'block';
+    document.getElementById('editCoverUploadPrompt').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+};
+
+// ── PHASE 4: OPEN EDIT BINDER ──
+window.openEditBinder = id => {
+  const b = binders.find(x => x.id === id); if (!b) return;
+  editBinderContext = b;
+  document.getElementById('editBinderNameInput').value = b.name;
+  editSelectedColor = b.color;
+  document.querySelectorAll('#editColorPicker .color-dot').forEach(d => {
+    d.classList.toggle('selected', d.dataset.color === b.color);
+  });
+  editCoverMode = 'gallery';
+  editCoverDataUrl = null;
+  editCoverGalleryIndex = null;
+  editCoverFit = b.coverFit || 'cover';
+  buildCoverGallery(null);
+  switchCoverTab('gallery');
+  document.querySelectorAll('.cover-fit-btn-edit').forEach(btn => {
+    const isSelected = btn.dataset.fit === editCoverFit;
+    btn.style.borderColor = isSelected ? 'var(--teal-bright)' : 'var(--navy-border)';
+    btn.style.background = isSelected ? 'var(--teal-glow)' : 'transparent';
+    btn.style.color = isSelected ? 'var(--teal-bright)' : 'var(--text-secondary)';
+  });
+  const img = document.getElementById('editCoverPreviewImg');
+  img.style.display = 'none';
+  document.getElementById('editCoverUploadPrompt').style.display = 'flex';
+  openModal('editBinderModal');
+};
+
+window.saveEditBinder = async () => {
+  const b = editBinderContext; if (!b) return;
+  const name = document.getElementById('editBinderNameInput').value.trim();
+  if (!name) { document.getElementById('editBinderNameInput').focus(); return; }
+  const btn = document.getElementById('saveBinderBtn'); btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    let coverUrl = b.coverUrl || null;
+    if (editCoverMode === 'none') {
+      coverUrl = null;
+    } else if (editCoverMode === 'upload' && editCoverDataUrl) {
+      const blob = await (await fetch(editCoverDataUrl)).blob();
+      const sr = storageRef(storage, `users/${currentUser.uid}/covers/${Date.now()}`);
+      await new Promise((res, rej) => {
+        const task = uploadBytesResumable(sr, blob);
+        task.on('state_changed', null, rej, async () => { coverUrl = await getDownloadURL(task.snapshot.ref); res(); });
+      });
+    } else if (editCoverMode === 'gallery' && editCoverGalleryIndex !== null) {
+      coverUrl = 'gradient:' + editCoverGalleryIndex;
+    }
+    await updateDoc(doc(db, 'users', currentUser.uid, 'binders', b.id), {
+      name, color: editSelectedColor, coverUrl, coverFit: editCoverFit, updatedAt: serverTimestamp()
+    });
+    closeModal('editBinderModal');
+    showToast('Binder updated!', 'success');
+    await fetchBinders();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  btn.textContent = 'Save Changes'; btn.disabled = false;
+};
+
+window.confirmDeleteBinder = async () => {
+  const b = editBinderContext; if (!b) return;
+  if (!confirm(`Delete "${b.name}"? You'll have 10 seconds to undo.`)) return;
+  closeModal('editBinderModal');
+  goToShelf();
+  // Snapshot the binder data for undo
+  const snapshot = JSON.parse(JSON.stringify(b));
+  try {
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'binders', b.id));
+    await fetchBinders();
+    showUndoToast(`"${b.name}" deleted`, async () => {
+      // Restore binder to Firestore
+      await addDoc(collection(db, 'users', currentUser.uid, 'binders'), {
+        name: snapshot.name, color: snapshot.color, tabStyle: snapshot.tabStyle,
+        hasToc: snapshot.hasToc, coverUrl: snapshot.coverUrl || null,
+        coverFit: snapshot.coverFit || 'cover',
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      });
+      await fetchBinders();
+    });
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// ── PHASE 4: GRADIENT COVER SUPPORT IN SHELF ──
+function getCoverStyle(b) {
+  if (b.coverUrl) {
+    if (b.coverUrl.startsWith('gradient:')) {
+      const idx = parseInt(b.coverUrl.split(':')[1]);
+      const design = COVER_DESIGNS[idx];
+      return design ? design.style + ';' : `background:${b.color}20;`;
+    }
+    const fit = b.coverFit || 'cover';
+    const bg = fit === 'contain' ? `var(--navy-deep)` : 'transparent';
+    return `background-image:url('${b.coverUrl}');background-size:${fit};background-position:center;background-repeat:no-repeat;background-color:${bg};`;
+  }
+  return `background:${b.color}20;border:1px solid ${b.color}40;`;
+}
+
+// ── PHASE 4: TAB CONTEXT MENU ──
+let tabCtxTarget = null;
+window.openTabCtxMenu = (ev, tab) => {
+  tabCtxTarget = tab;
+  const menu = document.getElementById('tabCtxMenu');
+  menu.style.top = ev.clientY + 'px';
+  menu.style.left = '52px';
+  menu.classList.add('open');
+  document.getElementById('tabCtxEdit').onclick = () => { menu.classList.remove('open'); openEditTab(tab); };
+  document.getElementById('tabCtxDelete').onclick = () => { menu.classList.remove('open'); confirmDeleteTab(tab); };
+};
+document.addEventListener('click', e => { if (!e.target.closest('#tabCtxMenu')) document.getElementById('tabCtxMenu')?.classList.remove('open'); });
+
+// ── PHASE 4: EDIT TAB ──
+window.openEditTab = tab => {
+  editTabContext = tab;
+  document.getElementById('editTabLabelInput').value = tab.label;
+  document.getElementById('editTabIconInput').value = tab.icon || '';
+  editSelectedEmoji = tab.icon || '📋';
+  document.getElementById('editEmojiTrigger').textContent = tab.icon || '📋';
+  editSelectedTabColor = tab.color;
+  document.querySelectorAll('#editTabColorPicker .tab-color-swatch').forEach(d => {
+    d.classList.toggle('selected', d.dataset.color === tab.color);
+  });
+  openModal('editTabModal');
+};
+
+window.saveEditTab = async () => {
+  const tab = editTabContext; if (!tab) return;
+  const label = document.getElementById('editTabLabelInput').value.trim();
+  if (!label) { document.getElementById('editTabLabelInput').focus(); return; }
+  const btn = document.getElementById('saveTabBtn'); btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    const icon = document.getElementById('editTabIconInput').value.trim() || editSelectedEmoji;
+    await updateDoc(doc(db, 'users', currentUser.uid, 'binders', activeBinder.id, 'tabs', tab.id), {
+      label, icon, color: editSelectedTabColor
+    });
+    closeModal('editTabModal');
+    showToast('Tab updated!', 'success');
+    await fetchBinders();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  btn.textContent = 'Save Changes'; btn.disabled = false;
+};
+
+window.confirmDeleteTab = async (tab) => {
+  const t = tab || editTabContext; if (!t) return;
+  if (!confirm(`Delete tab "${t.label}"? You'll have 10 seconds to undo.`)) return;
+  const snapshot = JSON.parse(JSON.stringify(t));
+  const binderId = activeBinder.id;
+  closeModal('editTabModal');
+  if (activeBinder.hasToc) { activeTabId = 'toc'; }
+  else { activeTabId = null; }
+  try {
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'binders', binderId, 'tabs', t.id));
+    await fetchBinders();
+    showUndoToast(`Tab "${t.label}" deleted`, async () => {
+      await addDoc(collection(db, 'users', currentUser.uid, 'binders', binderId, 'tabs'), {
+        label: snapshot.label, icon: snapshot.icon || '', color: snapshot.color,
+        order: snapshot.order || 0, createdAt: serverTimestamp()
+      });
+      await fetchBinders();
+    });
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// ── PHASE 4: EDIT TAB EMOJI ──
+window.toggleEditEmojiPanel = () => {
+  const p = document.getElementById('editEmojiPanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) buildEditEmojiPanel();
+};
+function buildEditEmojiPanel() {
+  const scroll = document.getElementById('editEmojiScroll'); scroll.innerHTML = '';
+  Object.entries(EMOJIS).forEach(([cat, emojis]) => {
+    const lbl = document.createElement('div'); lbl.className = 'emoji-category-label'; lbl.textContent = cat;
+    const grid = document.createElement('div'); grid.className = 'emoji-grid';
+    emojis.forEach(em => { const b = document.createElement('button'); b.className = 'emoji-btn'; b.textContent = em; b.onclick = () => pickEditEmoji(em); grid.appendChild(b); });
+    scroll.appendChild(lbl); scroll.appendChild(grid);
+  });
+}
+window.filterEditEmojis = q => {
+  const scroll = document.getElementById('editEmojiScroll'); scroll.innerHTML = '';
+  if (!q.trim()) { buildEditEmojiPanel(); return; }
+  const grid = document.createElement('div'); grid.className = 'emoji-grid';
+  Object.values(EMOJIS).flat().forEach(em => { const b = document.createElement('button'); b.className = 'emoji-btn'; b.textContent = em; b.onclick = () => pickEditEmoji(em); grid.appendChild(b); });
+  scroll.appendChild(grid);
+};
+function pickEditEmoji(em) { editSelectedEmoji = em; document.getElementById('editEmojiTrigger').textContent = em; document.getElementById('editTabIconInput').value = em; document.getElementById('editEmojiPanel').classList.remove('open'); }
+window.syncEditEmoji = val => { const chars = [...val]; if (chars.length > 0) { editSelectedEmoji = chars[0]; document.getElementById('editEmojiTrigger').textContent = chars[0]; } };
+window.selectEditColor = el => { document.querySelectorAll('#editColorPicker .color-dot').forEach(d => d.classList.remove('selected')); el.classList.add('selected'); editSelectedColor = el.dataset.color; };
+window.selectEditTabColor = el => { document.querySelectorAll('#editTabColorPicker .tab-color-swatch').forEach(d => d.classList.remove('selected')); el.classList.add('selected'); editSelectedTabColor = el.dataset.color; };
+document.addEventListener('click', e => { if (!e.target.closest('.emoji-picker-wrap')) document.getElementById('editEmojiPanel')?.classList.remove('open'); });
+
+
+// ── PHASE 3: DRAG & DROP ──
+// Single binder-level drop zone — initialized once when binder opens
+function initBinderDropZone() {
+  const area = document.getElementById('binderPageArea');
+  if (area._dropZoneReady) return;
+  area._dropZoneReady = true;
+
+  area.addEventListener('dragover', e => {
+    e.preventDefault();
+    area.classList.add('drag-over');
+  });
+  area.addEventListener('dragleave', e => {
+    if (!area.contains(e.relatedTarget)) area.classList.remove('drag-over');
+  });
+  area.addEventListener('drop', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    area.classList.remove('drag-over');
+    // Always use the CURRENT active tab at time of drop
+    if (!activeTabId || activeTabId === 'toc') {
+      showToast('Please select a tab before dropping files', 'error');
+      return;
+    }
+    const tab = activeBinder.tabs.find(t => t.id === activeTabId);
+    if (!tab) return;
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) uploadFilesToTab(files, tab);
+  });
+}
+
+async function uploadFilesToTab(files, tab) {
+  if (isUploading) return;
+  isUploading = true;
+  const tabId=tab.id;
+  const binderId=activeBinder.id;
+  let anyUploaded=false;
+  for (const file of files) {
+    const pid='prog_'+Date.now()+Math.random();
+    addProg(pid, file.name);
+    try {
+      const path=`users/${currentUser.uid}/binders/${binderId}/tabs/${tabId}/${Date.now()}_${file.name}`;
+      const sr=storageRef(storage, path);
+      const task=uploadBytesResumable(sr, file);
+      await new Promise((res,rej)=>task.on('state_changed',
+        snap=>updProg(pid, Math.round(snap.bytesTransferred/snap.totalBytes*100)),
+        rej,
+        async()=>{
+          const url=await getDownloadURL(task.snapshot.ref);
+          await addDoc(docsCol(binderId,tabId),{name:file.name,size:fmtSize(file.size),url,storagePath:path,uploadedAt:serverTimestamp()});
+          await updateDoc(doc(db,'users',currentUser.uid,'binders',binderId),{updatedAt:serverTimestamp()});
+          rmProg(pid); res();
+        }
+      ));
+      anyUploaded=true;
+      showToast(file.name+' uploaded!','success');
+    } catch(err) { rmProg(pid); showToast('Upload failed: '+err.message,'error'); }
+  }
+  isUploading = false;
+  if(anyUploaded){
+    await fetchBinders();
+    const updatedTab=activeBinder.tabs.find(t=>t.id===tabId);
+    if(updatedTab) renderDocs(updatedTab);
+  }
+}
+
+// ── PHASE 3: IMAGE PREVIEW ──
+window.previewImage = (url, name) => {
+  document.getElementById('imgPreviewEl').src = url;
+  document.getElementById('imgPreviewName').textContent = name;
+  document.getElementById('imgPreviewBackdrop').classList.add('open');
+};
+window.closeImgPreview = (e) => {
+  if (e && e.target !== document.getElementById('imgPreviewBackdrop')) return;
+  document.getElementById('imgPreviewBackdrop').classList.remove('open');
+  document.getElementById('imgPreviewEl').src='';
+};
+
+// ── PHASE 3: RENAME ──
+let renameContext = null;
+window.startRename = (tabId, docId, currentName) => {
+  renameContext = {tabId, docId};
+  const input = document.getElementById('renameInput');
+  input.value = currentName;
+  openModal('renameModal');
+  setTimeout(()=>{ input.focus(); input.select(); }, 100);
+};
+window.confirmRename = async () => {
+  if (!renameContext) return;
+  const newName = document.getElementById('renameInput').value.trim();
+  if (!newName) { document.getElementById('renameInput').focus(); return; }
+  const btn = document.getElementById('renameBtn'); btn.textContent='Saving…'; btn.disabled=true;
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',renameContext.tabId,'documents',renameContext.docId),{name:newName});
+    closeModal('renameModal');
+    showToast('Renamed!','success');
+    renameContext=null;
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+  btn.textContent='Rename'; btn.disabled=false;
+};
+document.getElementById('renameInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmRename(); });
+
+// ── PHASE 3: TAB REORDER ──
+let dragSrcTab = null;
+function makeTabDraggable(el, tab) {
+  el.draggable = true;
+  el.addEventListener('dragstart', e => { dragSrcTab=tab; el.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  el.addEventListener('dragend', () => { dragSrcTab=null; el.classList.remove('dragging'); document.querySelectorAll('.binder-tab').forEach(t=>{ t.classList.remove('drag-target-above','drag-target-below'); }); });
+  el.addEventListener('dragover', e => {
+    e.preventDefault(); if (!dragSrcTab || dragSrcTab.id===tab.id) return;
+    document.querySelectorAll('.binder-tab').forEach(t=>t.classList.remove('drag-target-above','drag-target-below'));
+    const rect=el.getBoundingClientRect();
+    const mid=rect.top+rect.height/2;
+    el.classList.add(e.clientY<mid?'drag-target-above':'drag-target-below');
+  });
+  el.addEventListener('drop', async e => {
+    e.preventDefault(); if (!dragSrcTab || dragSrcTab.id===tab.id) return;
+    const rect=el.getBoundingClientRect(); const mid=rect.top+rect.height/2;
+    const insertBefore=e.clientY<mid;
+    const tabs=[...activeBinder.tabs];
+    const fromIdx=tabs.findIndex(t=>t.id===dragSrcTab.id);
+    const toIdx=tabs.findIndex(t=>t.id===tab.id);
+    const [moved]=tabs.splice(fromIdx,1);
+    const newIdx=insertBefore ? (toIdx>fromIdx?toIdx-1:toIdx) : (toIdx<fromIdx?toIdx+1:toIdx);
+    tabs.splice(newIdx,0,moved);
+    try {
+      for (let i=0;i<tabs.length;i++) await updateDoc(doc(db,'users',currentUser.uid,'binders',activeBinder.id,'tabs',tabs[i].id),{order:i});
+      await fetchBinders();
+      renderTabs();
+      showToast('Tab order saved!','success');
+    } catch(err) { showToast('Reorder failed','error'); }
+  });
+}
+
+</script>
+
+<!-- TAB CONTEXT MENU -->
+<div id="tabCtxMenu" class="tab-ctx-menu">
+  <div class="tab-ctx-item" id="tabCtxEdit">✏️ Edit Tab</div>
+  <div class="tab-ctx-item danger" id="tabCtxDelete">✕ Delete Tab</div>
+</div>
+
+<!-- EDIT BINDER MODAL -->
+<div class="modal-backdrop" id="editBinderModal">
+  <div class="modal">
+    <div class="modal-title">Edit Binder</div>
+    <div class="form-group">
+      <label class="form-label">Binder Name</label>
+      <input class="form-input" type="text" id="editBinderNameInput"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cover</label>
+      <div class="cover-tabs">
+        <button class="cover-tab active" id="coverTabGallery" onclick="switchCoverTab('gallery')">Gallery</button>
+        <button class="cover-tab" id="coverTabUpload" onclick="switchCoverTab('upload')">Upload</button>
+        <button class="cover-tab" id="coverTabNone" onclick="switchCoverTab('none')">Color Only</button>
+      </div>
+      <div id="coverGalleryPanel">
+        <div class="cover-gallery" id="coverGallery"></div>
+      </div>
+      <div id="coverUploadPanel" style="display:none;">
+        <div class="cover-upload-area" onclick="document.getElementById('editCoverFileInput').click()">
+          <img id="editCoverPreviewImg" class="cover-preview-img"/>
+          <div id="editCoverUploadPrompt" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="font-size:22px;">🖼️</div>
+            <div style="font-size:13px;">Tap to upload a cover image</div>
+          </div>
+        </div>
+        <input type="file" id="editCoverFileInput" accept="image/*" style="display:none;" onchange="previewEditCover(event)"/>
+      </div>
+      <div id="coverNonePanel" style="display:none;">
+        <div style="font-size:13px;color:var(--text-muted);padding:8px 0;">The binder spine color will show instead.</div>
+      </div>
+    </div>
+    <div class="form-group" id="editCoverFitGroup">
+      <label class="form-label">Image Display</label>
+      <div style="display:flex;gap:8px;">
+        <div class="cover-fit-btn-edit selected" data-fit="cover" onclick="selectEditCoverFit(this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--teal-bright);background:var(--teal-glow);color:var(--teal-bright);font-size:12px;font-weight:500;cursor:pointer;text-align:center;">Fill & Crop</div>
+        <div class="cover-fit-btn-edit" data-fit="contain" onclick="selectEditCoverFit(this)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--navy-border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;text-align:center;">Fit Whole Image</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Spine Color</label>
+      <div class="color-picker-row" id="editColorPicker">
+        <div class="color-dot" style="background:#1A2535" data-color="#1A2535" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#0F6E56" data-color="#0F6E56" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#BA7517" data-color="#BA7517" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#185FA5" data-color="#185FA5" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#8B1A1A" data-color="#8B1A1A" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#534AB7" data-color="#534AB7" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#993556" data-color="#993556" onclick="selectEditColor(this)"></div>
+        <div class="color-dot" style="background:#3B6D11" data-color="#3B6D11" onclick="selectEditColor(this)"></div>
+      </div>
+    </div>
+    <div class="modal-actions" style="flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-danger" style="flex:0 0 auto;" onclick="confirmDeleteBinder()">🗑 Delete Binder</button>
+      <div style="flex:1;display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="closeModal('editBinderModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveBinderBtn" onclick="saveEditBinder()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TAB MODAL -->
+<div class="modal-backdrop" id="editTabModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">Edit Tab</div>
+    <div class="form-group">
+      <label class="form-label">Tab Label</label>
+      <input class="form-input" type="text" id="editTabLabelInput"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tab Icon</label>
+      <div class="emoji-picker-wrap">
+        <div class="emoji-trigger-row">
+          <div class="emoji-trigger" id="editEmojiTrigger" onclick="toggleEditEmojiPanel()">📋</div>
+          <input class="form-input" type="text" id="editTabIconInput" placeholder="Or type/paste any emoji" oninput="syncEditEmoji(this.value)" style="flex:1;"/>
+        </div>
+        <div class="emoji-panel" id="editEmojiPanel">
+          <input class="emoji-search" type="text" placeholder="Search emojis…" oninput="filterEditEmojis(this.value)"/>
+          <div class="emoji-scroll" id="editEmojiScroll"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tab Color</label>
+      <div class="tab-color-row" id="editTabColorPicker" style="flex-wrap:wrap;gap:6px;">
+        <div class="tab-color-swatch" style="background:#0F6E56" data-color="#0F6E56" onclick="selectEditTabColor(this)" title="Forest Green"></div>
+        <div class="tab-color-swatch" style="background:#1D9E75" data-color="#1D9E75" onclick="selectEditTabColor(this)" title="Teal"></div>
+        <div class="tab-color-swatch" style="background:#5DCAA5" data-color="#5DCAA5" onclick="selectEditTabColor(this)" title="Mint"></div>
+        <div class="tab-color-swatch" style="background:#185FA5" data-color="#185FA5" onclick="selectEditTabColor(this)" title="Navy Blue"></div>
+        <div class="tab-color-swatch" style="background:#378ADD" data-color="#378ADD" onclick="selectEditTabColor(this)" title="Sky Blue"></div>
+        <div class="tab-color-swatch" style="background:#85B7EB" data-color="#85B7EB" onclick="selectEditTabColor(this)" title="Light Blue"></div>
+        <div class="tab-color-swatch" style="background:#534AB7" data-color="#534AB7" onclick="selectEditTabColor(this)" title="Purple"></div>
+        <div class="tab-color-swatch" style="background:#993556" data-color="#993556" onclick="selectEditTabColor(this)" title="Berry"></div>
+        <div class="tab-color-swatch" style="background:#D4537E" data-color="#D4537E" onclick="selectEditTabColor(this)" title="Pink"></div>
+        <div class="tab-color-swatch" style="background:#8B1A1A" data-color="#8B1A1A" onclick="selectEditTabColor(this)" title="Crimson"></div>
+        <div class="tab-color-swatch" style="background:#D85A30" data-color="#D85A30" onclick="selectEditTabColor(this)" title="Burnt Orange"></div>
+        <div class="tab-color-swatch" style="background:#BA7517" data-color="#BA7517" onclick="selectEditTabColor(this)" title="Amber"></div>
+        <div class="tab-color-swatch" style="background:#EF9F27" data-color="#EF9F27" onclick="selectEditTabColor(this)" title="Gold"></div>
+        <div class="tab-color-swatch" style="background:#3B6D11" data-color="#3B6D11" onclick="selectEditTabColor(this)" title="Olive"></div>
+        <div class="tab-color-swatch" style="background:#639922" data-color="#639922" onclick="selectEditTabColor(this)" title="Lime"></div>
+        <div class="tab-color-swatch" style="background:#1A2535" data-color="#1A2535" onclick="selectEditTabColor(this)" title="Midnight"></div>
+        <div class="tab-color-swatch" style="background:#444441" data-color="#444441" onclick="selectEditTabColor(this)" title="Charcoal"></div>
+        <div class="tab-color-swatch" style="background:#888780" data-color="#888780" onclick="selectEditTabColor(this)" title="Stone"></div>
+      </div>
+    </div>
+    <div class="modal-actions" style="flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-danger" style="flex:0 0 auto;" onclick="confirmDeleteTab()">🗑 Delete Tab</button>
+      <div style="flex:1;display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="closeModal('editTabModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveTabBtn" onclick="saveEditTab()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- OFFLINE BAR -->
+<div class="offline-bar" id="offlineBar">⚠️ You are offline — your binders are still accessible</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-title">Aurelia<span>Folio</span></div>
+  <div class="install-banner-text">Install AureliaFolio on your home screen for quick access — works just like a real app!</div>
+  <div class="install-banner-actions">
+    <button class="install-btn ghost" onclick="dismissInstall()">Not now</button>
+    <button class="install-btn primary" onclick="doInstall()">Install ✦</button>
+  </div>
+</div>
+
+
+<!-- UNDO TOAST -->
+<div class="undo-toast" id="undoToast">
+  <span id="undoToastMsg"></span>
+  <button class="undo-btn" onclick="doUndo()">Undo</button>
+  <div class="undo-progress" id="undoProgress" style="width:100%;"></div>
+</div>
+
+
+<!-- MOVE DOCUMENT MODAL -->
+<div class="modal-backdrop" id="moveDocModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">Move Document</div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Choose which tab to move <strong id="moveDocName"></strong> to:</div>
+    <div class="move-doc-tab-list" id="moveDocTabList"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('moveDocModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOC NOTES MODAL -->
+<div class="modal-backdrop" id="docNotesModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">Document Notes</div>
+    <div class="form-group">
+      <label class="form-label">Description / Notes</label>
+      <textarea class="doc-notes-modal-input" id="docNotesInput" placeholder="Add a description or notes about this document…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('docNotesModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveDocNotesBtn" onclick="saveDocNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- SYNC MODAL -->
+<div class="modal-backdrop" id="syncModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">☁️ Backup & Restore</div>
+
+    <div class="sync-modal-section">
+      <div class="sync-modal-section-title">⬇️ Export to File</div>
+      <div class="sync-modal-section-desc">
+        Downloads a complete backup of your entire library — all binders, tabs, notes, and document records — as a JSON file. Save it to Google Drive, OneDrive, or anywhere you like. Works even if the app stops existing.
+      </div>
+      <button class="sync-btn export" onclick="doExportLibrary()">⬇️ Export to File</button>
+      <div class="sync-last-backup" id="syncLastBackup"></div>
+    </div>
+
+    <hr class="sync-divider"/>
+
+    <div class="sync-modal-section">
+      <div class="sync-modal-section-title">⬆️ Import from File</div>
+      <div class="sync-modal-section-desc">
+        Pick a previously exported JSON file. Binders that don't exist yet will be added. Binders that already exist will be skipped — nothing is ever deleted or overwritten.
+      </div>
+      <button class="sync-btn import" onclick="document.getElementById('importFileInput').click()">⬆️ Import from File</button>
+      <div class="sync-import-result" id="syncImportResult"></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('syncModal')">Close</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="doImportLibrary(event)"/>
+
+</body>
+</html>
