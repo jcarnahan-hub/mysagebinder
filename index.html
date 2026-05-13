@@ -257,6 +257,12 @@ select.form-input option{background:var(--parchment-elevated);}
 .sync-import-result.error{background:rgba(160,82,45,0.1);border:1px solid #A0522D;color:#A0522D;}
 .sync-divider{border:none;border-top:1px solid var(--parchment-border);margin:4px 0 12px;}
 
+/* ── SYNC BINDER PREVIEW SWATCHES (Bug Fix: gradient covers now visible in export modal) ── */
+.sync-binder-previews{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;padding:12px;background:var(--parchment-surface);border-radius:var(--radius);border:1px solid var(--parchment-border);}
+.sync-binder-swatch{width:48px;height:32px;border-radius:6px;border:1px solid var(--parchment-border);flex-shrink:0;position:relative;}
+.sync-binder-swatch-label{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52px;text-align:center;}
+.sync-preview-heading{font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+
 /* PHASE 7: RECENTLY OPENED */
 .recently-opened{margin-bottom:28px;}
 .recently-label{font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
@@ -1090,7 +1096,6 @@ window.handleFileUpload = async e => {
     }catch(err){rmProg(pid);showToast('Upload failed: '+err.message,'error');}
   }
   isUploading = false;
-  isUploading = false;
   if(anyUploaded){
     await fetchBinders();
     const updatedTab=activeBinder.tabs.find(t=>t.id===tabId);
@@ -1104,7 +1109,6 @@ window.deleteDocument = async (tabId,docId,path) => {
   if(!confirm('Delete this document? You\'ll have 10 seconds to undo.')) return;
   const binderId = activeBinder.id;
   try{
-    // Get doc data before deleting for undo
     const tab = activeBinder.tabs.find(t=>t.id===tabId);
     const docData = tab ? tab.docs.find(d=>d.id===docId) : null;
     await deleteDoc(doc(db,'users',currentUser.uid,'binders',binderId,'tabs',tabId,'documents',docId));
@@ -1321,7 +1325,6 @@ window.saveDocNotes = async () => {
   btn.textContent='Save Notes'; btn.disabled=false;
 };
 
-
 // ── PHASE 6: BINDER PIN ──
 async function toggleBinderPin(binderId, currentlyPinned) {
   try {
@@ -1330,7 +1333,6 @@ async function toggleBinderPin(binderId, currentlyPinned) {
     showToast(currentlyPinned?'Binder unpinned':'Binder pinned to top! 📌','success');
   } catch(e) { showToast('Error: '+e.message,'error'); }
 }
-
 
 // ── PINNED / FAVORITES ──
 window.togglePin = async (tabId, docId, currentlyPinned) => {
@@ -1407,8 +1409,7 @@ window.openBinderToDoc = (binderId, tabId) => {
   setTimeout(() => setActiveTab(tabId), 300);
 };
 
-
-// ── PROTECTION: SOFT DELETE WITH UNDO ──
+// ── SOFT DELETE WITH UNDO ──
 let undoStack = null;
 let undoTimer = null;
 let undoProgressTimer = null;
@@ -1457,8 +1458,43 @@ window.openSyncModal = () => {
     lastEl.textContent = 'No backup yet — we recommend weekly exports.';
   }
   document.getElementById('syncImportResult').style.display = 'none';
+  renderSyncPreviews(); // ── BUG FIX: render gradient cover swatches before opening
   openModal('syncModal');
 };
+
+// ── BUG FIX: SYNC MODAL COVER PREVIEWS ──
+// Renders small cover swatches for every binder inside the export modal.
+// Gradient covers (stored as "gradient:N") were previously invisible here
+// because there was no preview at all. Now getCoverStyle() is reused so
+// all cover types — gradient, uploaded image, and color-only — render correctly.
+function renderSyncPreviews() {
+  const container = document.getElementById('syncBinderPreviews');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!binders.length) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
+  binders.forEach(b => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:18px 0;';
+    const swatch = document.createElement('div');
+    swatch.className = 'sync-binder-swatch';
+    // Reuse getCoverStyle() — handles gradient:N, uploaded URLs, and color fallback
+    swatch.setAttribute('style',
+      `width:48px;height:32px;border-radius:6px;border:1px solid var(--parchment-border);flex-shrink:0;${getCoverStyle(b)}`
+    );
+    swatch.title = b.name;
+    const label = document.createElement('div');
+    label.className = 'sync-binder-swatch-label';
+    label.textContent = b.name;
+    label.style.cssText = 'font-size:9px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52px;text-align:center;margin-top:2px;';
+    wrap.appendChild(swatch);
+    wrap.appendChild(label);
+    container.appendChild(wrap);
+  });
+}
 
 // ── SYNC: EXPORT ──
 window.doExportLibrary = async () => {
@@ -1581,16 +1617,13 @@ window.doImportLibrary = async (e) => {
   }
 };
 
-// Keep exportLibrary as alias for backwards compatibility
 window.exportLibrary = window.doExportLibrary;
-
 
 // ── PHASE 5: PWA INSTALL ──
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  // Show banner after 3 seconds if user hasn't dismissed
   const dismissed = localStorage.getItem('af_install_dismissed');
   if (!dismissed) setTimeout(() => document.getElementById('installBanner').classList.add('show'), 3000);
 });
@@ -1630,7 +1663,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-
 // ── PHASE 4: COVER GALLERY ──
 const COVER_DESIGNS = [
   {label:'Midnight Navy', style:'background:linear-gradient(135deg,#0F1824 0%,#1D9E75 100%)'},
@@ -1643,7 +1675,7 @@ const COVER_DESIGNS = [
   {label:'Slate', style:'background:linear-gradient(135deg,#1A2535 0%,#6B849E 100%)'},
   {label:'Warm Gold', style:'background:linear-gradient(135deg,#1A1000 0%,#EF9F27 100%)'},
 ];
-let editCoverMode = 'gallery'; // 'gallery' | 'upload' | 'none'
+let editCoverMode = 'gallery';
 let editCoverDataUrl = null;
 let editCoverGalleryIndex = null;
 let editBinderContext = null;
@@ -1764,13 +1796,11 @@ window.confirmDeleteBinder = async () => {
   if (!confirm(`Delete "${b.name}"? You'll have 10 seconds to undo.`)) return;
   closeModal('editBinderModal');
   goToShelf();
-  // Snapshot the binder data for undo
   const snapshot = JSON.parse(JSON.stringify(b));
   try {
     await deleteDoc(doc(db, 'users', currentUser.uid, 'binders', b.id));
     await fetchBinders();
     showUndoToast(`"${b.name}" deleted`, async () => {
-      // Restore binder to Firestore
       await addDoc(collection(db, 'users', currentUser.uid, 'binders'), {
         name: snapshot.name, color: snapshot.color, tabStyle: snapshot.tabStyle,
         hasToc: snapshot.hasToc, coverUrl: snapshot.coverUrl || null,
@@ -1890,9 +1920,7 @@ window.selectEditColor = el => { document.querySelectorAll('#editColorPicker .co
 window.selectEditTabColor = el => { document.querySelectorAll('#editTabColorPicker .tab-color-swatch').forEach(d => d.classList.remove('selected')); el.classList.add('selected'); editSelectedTabColor = el.dataset.color; };
 document.addEventListener('click', e => { if (!e.target.closest('.emoji-picker-wrap')) document.getElementById('editEmojiPanel')?.classList.remove('open'); });
 
-
 // ── PHASE 3: DRAG & DROP ──
-// Single binder-level drop zone — initialized once when binder opens
 function initBinderDropZone() {
   const area = document.getElementById('binderPageArea');
   if (area._dropZoneReady) return;
@@ -1909,7 +1937,6 @@ function initBinderDropZone() {
     e.preventDefault();
     e.stopPropagation();
     area.classList.remove('drag-over');
-    // Always use the CURRENT active tab at time of drop
     if (!activeTabId || activeTabId === 'toc') {
       showToast('Please select a tab before dropping files', 'error');
       return;
@@ -2148,7 +2175,6 @@ function makeTabDraggable(el, tab) {
   </div>
 </div>
 
-
 <!-- OFFLINE BAR -->
 <div class="offline-bar" id="offlineBar">⚠️ You are offline — your binders are still accessible</div>
 
@@ -2162,14 +2188,12 @@ function makeTabDraggable(el, tab) {
   </div>
 </div>
 
-
 <!-- UNDO TOAST -->
 <div class="undo-toast" id="undoToast">
   <span id="undoToastMsg"></span>
   <button class="undo-btn" onclick="doUndo()">Undo</button>
   <div class="undo-progress" id="undoProgress" style="width:100%;"></div>
 </div>
-
 
 <!-- MOVE DOCUMENT MODAL -->
 <div class="modal-backdrop" id="moveDocModal">
@@ -2198,11 +2222,14 @@ function makeTabDraggable(el, tab) {
   </div>
 </div>
 
-
 <!-- SYNC MODAL -->
 <div class="modal-backdrop" id="syncModal">
   <div class="modal" style="max-width:420px;">
     <div class="modal-title">☁️ Backup & Restore</div>
+
+    <!-- BUG FIX: Binder cover preview row — gradient covers now render correctly here -->
+    <div class="sync-preview-heading">Your Library</div>
+    <div class="sync-binder-previews" id="syncBinderPreviews"></div>
 
     <div class="sync-modal-section">
       <div class="sync-modal-section-title">⬇️ Export to File</div>
